@@ -2,21 +2,21 @@ public class Libro {
   private String isbn;
   private String titulo;
   private String autor;
-  private int año;
+  private Integer año;
   private String genero;
   private int ejemplaresDisponibles;
 
-  public Libro(String isbn, String titulo, String autor, int ejemplaresDisponibles, int año, String genero) {
+  public Libro(String isbn, String titulo, String autor, int ejemplaresDisponibles) {
+    this(isbn, titulo, autor, ejemplaresDisponibles, null, null);
+  }
+
+  public Libro(String isbn, String titulo, String autor, int ejemplaresDisponibles, Integer año, String genero) {
     this.isbn = isbn;
     this.titulo = titulo;
     this.autor = autor;
     this.año = año;
     this.genero = genero;
     this.ejemplaresDisponibles = ejemplaresDisponibles;
-  }
-
-  public Libro(String isbn, String titulo, String autor, int ejemplaresDisponibles) {
-    this.Libro(isbn, titulo, autor, ejemplaresDisponibles, null, null);
   }
 
   // Getter de Genero
@@ -61,8 +61,8 @@ public class Libro {
 
   @Override
   public String toString() {
-    return "ISBN: " + this.isbn + ". " + this.descripcion() + "Año: " + this.año + "Género: " + this.genero + " ("
-        + this.ejemplaresDisponibles +
+    return "ISBN: " + this.isbn + ". " + this.descripcion() + ", Año: " + this.año
+        + ", Género: " + this.genero + " (" + this.ejemplaresDisponibles +
         " ejemplares disponibles)";
   }
 }
