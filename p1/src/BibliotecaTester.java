@@ -6,8 +6,8 @@ import java.util.*;
  * Verifica la correcta adición de libros con género y año, y el funcionamiento
  * de los filtros de búsqueda.
  *
- * @author NombreAlumno1
- * @author NombreAlumno2
+ * @author Pablo Gómez
+ * @author Jose Antonio Gómez
  * @version 1.0
  *          Nombre del fichero: BibliotecaTester.java
  */
@@ -25,7 +25,9 @@ public class BibliotecaTester {
     List<Libro> libros = new ArrayList<>(List.of(
         new Libro("1", "El Quijote", "Miguel de Cervantes", 5, 1512, "aventuras"), // ISBN, titulo, autor, #ejemplares
         new Libro("2", "El murciélago", "Jo Nesbo", 1, 2008, "aventuras"),
-        new Libro("3", "Learn Java", "David Hoffman", 6, 2001, "misterio")));
+        new Libro("3", "Libro3", "Autor2", 4, 2003, "misterio"),
+        new Libro("4", "Libro4", "Autor2", 4, 1995, "ciencia ficción"),
+        new Libro("5", "Learn Java", "David Hoffman", 6, 2001, "misterio")));
 
     for (Libro libro : libros) {
       biblioteca.añadirLibro(libro);
