@@ -1,6 +1,25 @@
 import java.util.*;
 
+/**
+ * Clase de prueba para la funcionalidad extendida de la Biblioteca (Apartado
+ * 4).
+ * Verifica la correcta adición de libros con género y año, y el funcionamiento
+ * de los filtros de búsqueda.
+ *
+ * @author NombreAlumno1
+ * @author NombreAlumno2
+ * @version 1.0
+ *          Nombre del fichero: BibliotecaTester.java
+ */
 public class BibliotecaTester {
+
+  /**
+   * Punto de entrada del programa de pruebas.
+   * Crea una biblioteca, añade libros con metadatos extendidos y prueba los
+   * métodos de filtrado.
+   *
+   * @param args Argumentos de línea de comandos.
+   */
   public static void main(String[] args) {
     Biblioteca biblioteca = new Biblioteca("biblioteca1");
     List<Libro> libros = new ArrayList<>(List.of(
