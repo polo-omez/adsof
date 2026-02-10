@@ -14,7 +14,7 @@ else
   mkdir -p bin
 
   echo "--COMPILING"
-  javac -d bin -sourcepath src src/*.java
+  javac -d bin -sourcepath src src/*/*.java
 
   echo "--EXECUTING $MAIN_CLASS"
   java -cp bin $MAIN_CLASS

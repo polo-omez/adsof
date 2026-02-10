@@ -1,0 +1,54 @@
+@startuml
+
+' Configuración de estilo (opcional para que se vea más moderno)
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+
+abstract class TramoTrayecto{
+    - origen: String
+    - destino: String
+
+    + tiempo(): double
+    + toString(): String
+    + tiempoTrayecto(): double
+}
+
+class TramoAPie{
+    - distancia: double
+
+    + toString(): String
+    + tiempoTrayecto(): double
+}
+
+class TramoTren{
+    - numParadas: int
+
+    + toString(): String
+    + tiempoTrayecto(): double
+}
+
+enum Linea{
+    + C1
+    + C2
+    + C5
+    --
+    - color: String
+    --
+    + toString(): String
+}
+
+enum Ritmo{
+  + RAPIDO
+  + MODERADO
+  + SUAVE
+
+  + toString(): String
+}
+
+' Relaciones
+TramoTrayecto  <|--  TramoTren 
+TramoTrayecto  <|--  TramoAPie 
+TramoTren --> Linea
+TramoAPie --> Ritmo
+
+@enduml
