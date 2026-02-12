@@ -1,0 +1,58 @@
+@startuml
+
+' Configuración de estilo (opcional para que se vea más moderno)
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+
+class Asistente{
+  -nombre: String
+  -llmPredeterminado: String
+}
+
+class LLM{
+  -llaveAPI: String
+  -nombre: String
+  -temperatura: double
+  -costePorToken: double
+}
+
+class Programador{
+  -nombre: String
+  -usuario: String
+}
+
+abstract class Tarea{
+    - nombre: String
+    - prompt: String
+    - lenguaje: String
+
+    + tiempo(): double
+    + toString(): String
+}
+
+class TareaGeneracion{
+    -codigoMetodo: String
+    -codigoClase: String
+    -codigoProyecto: String
+}
+
+class TareaOptimizacion{
+    -codigoMetodo: String
+    -codigoClase: String
+    -codigoProyecto: String
+}
+
+class TareaConsulta{
+
+}
+
+
+' Relaciones
+
+Tarea<|-- TareaGeneracion 
+Tarea<|-- TareaOptimizacion 
+Tarea<|-- TareaConsulta 
+Asistente -- "*"Programador
+
+
+@enduml

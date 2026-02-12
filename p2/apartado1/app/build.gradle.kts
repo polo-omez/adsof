@@ -32,6 +32,16 @@ java {
     }
 }
 
+
+sourceSets {
+    main {
+        java.setSrcDirs(listOf("src/java"))
+    }
+    
+    test {
+        java.setSrcDirs(listOf("src/test"))
+    }
+}
 application {
     // Define the main class for the application.
     mainClass.set("trayectos.Main")

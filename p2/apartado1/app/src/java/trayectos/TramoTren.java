@@ -1,13 +1,17 @@
 package trayectos;
 
-public class TramoAPie extends TramoTrayecto {
-  private Ritmo ritmo;
+public class TramoTren extends TramoTrayecto {
+  private Linea linea;
   private int numParadas;
 
-  public TramoAPie(String origen, String destino, Ritmo ritmo, int numParadas) {
+  public TramoTren(String origen, String destino, Linea linea, int numParadas) {
     super(origen, destino);
     this.linea = linea;
     this.numParadas = numParadas;
+  }
+
+  public double tiempo() {
+    return this.numParadas * this.linea.tiempoEntreParadas();
   }
 
   @Override

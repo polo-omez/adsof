@@ -10,21 +10,20 @@ abstract class TramoTrayecto{
 
     + tiempo(): double
     + toString(): String
-    + tiempoTrayecto(): double
 }
 
 class TramoAPie{
     - distancia: double
 
     + toString(): String
-    + tiempoTrayecto(): double
+    + tiempo(): double
 }
 
 class TramoTren{
     - numParadas: int
 
     + toString(): String
-    + tiempoTrayecto(): double
+    + tiempo(): double
 }
 
 enum Linea{
