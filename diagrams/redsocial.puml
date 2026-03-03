@@ -1,0 +1,29 @@
+@startuml
+
+' Configuración de estilo (opcional para que se vea más moderno)
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+
+class Enlace{
+  -coste: int 
+
+}
+
+class Usuario{
+  -nombre: String
+}
+
+class Mensaje{
+  -texto: String
+  -alcance: int
+}
+
+' Relaciones
+
+Enlace --> "origen" Usuario 
+Enlace --> "destino" Usuario 
+Usuario o-- "* enlaces" Enlace
+Mensaje --* "contenedor" Usuario
+
+
+@enduml

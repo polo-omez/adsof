@@ -1,0 +1,37 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+// 1. Le decimos a Gradle que el código está directamente en "src"
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src'] 
+        }
+    }
+}
+
+// 2. Configuramos Javadoc para que guarde la documentación en la carpeta "doc"
+tasks.withType(Javadoc) {
+    destinationDir = file("doc")
+}
+
+application {
+    mainClass = 'redsocial.EjemploUsoRedSocial' 
+}
+
+task runBasicos(type: JavaExec) {
+    group = 'Execution'
+    description = 'Ejecuta el programa EjemploUsoMensajesBasicos'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'redsocial.EjemploUsoMensajesBasicos'
+}
+
+// Tarea para ejecutar las pruebas del simulador
+task runRedSocial(type: JavaExec) {
+    group = 'Execution'
+    description = 'Ejecuta el programa EjemploUsoRedSocial'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'redsocial.EjemploUsoRedSocial'
+} 
