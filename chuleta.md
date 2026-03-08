@@ -1,10 +1,8 @@
-
 ### ENTORNO VIRTUAL Y PREPARACIÓN GENERAL
 
 * Crear entorno virtual: `python3.11 -m venv env`.
 * Activar entorno virtual: `source env/bin/activate`.
 * Instalar dependencias del proyecto: `pip install -r requirements.txt`.
-*(Asegúrate de que este archivo incluya `dj-database-url`, `djangorestframework` y `django-cors-headers`)*.
 
 ### CREACIÓN DEL PROYECTO Y BASE DE DATOS
 
@@ -18,7 +16,7 @@
 * Registrar la aplicación: En `INSTALLED_APPS`, añadir `'nombre_app.apps.NombreAppConfig'`.
 * Configurar la BBDD con la cadena de conexión:
 
-```python
+```
 import dj_database_url 
 
 # Sustituir la seccion DATABASES por esto:
@@ -38,7 +36,7 @@ DATABASES = {
 
 **CREACIÓN DE MODELOS (`nombre_app/models.py`):**
 
-```python
+```
 from django.db import models
 
 class ModeloA(models.Model):
@@ -60,7 +58,7 @@ class ModeloB(models.Model):
 
 **REGISTRO EN ADMINISTRACIÓN (`nombre_app/admin.py`):**
 
-```python
+```
 from django.contrib import admin
 from .models import ModeloA, ModeloB
 
@@ -79,11 +77,11 @@ admin.site.register(ModeloB)
 
 **SERIALIZADORES (`api/serializers.py`):**
 
-* Crear este archivo manualmente. Convierte los modelos de Python en formato JSON.
+* Creando este archivo. Convierte los modelos de Python en formato JSON.
 
-```python
+```
 from rest_framework import serializers
-from nombre_app.models import ModeloA, ModeloB # Importar los modelos creados en el Paso 3
+from nombre_app.models import ModeloA, ModeloB # Importar los modelos creados previamente
 
 class ModeloASerializer(serializers.ModelSerializer):
     class Meta: 
@@ -96,9 +94,9 @@ class ModeloASerializer(serializers.ModelSerializer):
 
 **VISTAS DE LA API (`api/views.py`):**
 
-* Usaremos `ModelViewSet` para que genere los métodos GET, POST, PUT y DELETE de forma automática.
+* Se usa `ModelViewSet` para generar los métodos GET, POST, PUT y DELETE de forma automática.
 
-```python
+```
 from rest_framework import viewsets
 from nombre_app.models import ModeloA, ModeloB
 from .serializers import ModeloASerializer, ModeloBSerializer
@@ -115,7 +113,7 @@ class ModeloAViewSet(viewsets.ModelViewSet):
 
 * Conectar los ViewSets a la ruta de la API requerida por el proyecto (ej. `/api/v1/`).
 
-```python
+```
 from django.contrib import admin
 from django.urls import path, include 
 from rest_framework.routers import DefaultRouter
@@ -208,7 +206,7 @@ onMounted(() => {
 
 **ESTRUCTURA DEL TEST (`nombre_app/tests.py`):**
 
-```python
+```
 from django.test import TestCase
 from nombre_app.models import ModeloA, ModeloB # Importar modelos
 
@@ -244,7 +242,7 @@ class IntegracionViewsTest(TestCase):
 
 **CÓDIGO CYPRESS (`test_frontend.cy.js`):**
 
-```javascript
+```
 describe('Test Flujo CRUD en Interfaz de Usuario', () => {
   it('Debe permitir añadir y eliminar registros desde el DOM', () => {
     // 0. Navegar a la aplicación (verificar el puerto en Vite/Vue)
@@ -274,9 +272,9 @@ describe('Test Flujo CRUD en Interfaz de Usuario', () => {
 
 ```
 
-### PASO 8: EJECUCIÓN Y COMPROBACIÓN FINAL
+### EJECUCIÓN Y COMPROBACIÓN FINAL
 
-Para asegurar un despliegue limpio y funcional, y garantizar que la base de datos está correctamente sincronizada con los modelos, ejecuta esta secuencia de comandos:
+Para asegurar un despliegue limpio y funcional, y garantizar que la base de datos está correctamente sincronizada con los modelos, ejecutar los siguientes comandos:
 
 1. `dropdb -U usuario_bd -h localhost nombre_bd` (Destruye la BD actual para empezar en limpio).
 2. `createdb -U usuario_bd -h localhost nombre_bd` (Crea una BD nueva y vacía).
