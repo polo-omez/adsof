@@ -3,103 +3,142 @@
 
 * Crear entorno virtual: `python3.11 -m venv env`.
 * Activar entorno virtual: `source env/bin/activate`.
-* Instalar dependencias dadas en el examen: `pip install -r requirements.txt`.
+* Instalar dependencias del proyecto: `pip install -r requirements.txt`.
 *(Asegúrate de que este archivo incluya `dj-database-url`, `djangorestframework` y `django-cors-headers`)*.
 
-### TAREAS 1 Y 2: CREACIÓN DEL PROYECTO Y BASE DE DATOS
+### CREACIÓN DEL PROYECTO Y BASE DE DATOS
 
-* Crear proyecto de Django: `django-admin startproject project .`
-* Crear aplicación principal: `python3 manage.py startapp application`.
-* Borrar base de datos antigua (por si acaso): `dropdb -U alumnodb -h localhost examen`.
-* Crear base de datos para el examen: `createdb -U alumnodb -h localhost examen`.
+* Crear proyecto de Django: `django-admin startproject nombre_proyecto .`
+* Crear aplicación principal: `python3 manage.py startapp nombre_app`.
+* Borrar base de datos antigua (por limpieza): `dropdb -U usuario_bd -h localhost nombre_bd`.
+* Crear la base de datos principal: `createdb -U usuario_bd -h localhost nombre_bd`.
 
-**CONFIGURACIÓN BASE (`project/settings.py`):**
+**CONFIGURACIÓN BASE (`nombre_proyecto/settings.py`):**
 
-* Registrar la aplicación: En `INSTALLED_APPS`, añadir `'application.apps.ApplicationConfig'`.
-* Configurar la BBDD con la cadena del enunciado:
+* Registrar la aplicación: En `INSTALLED_APPS`, añadir `'nombre_app.apps.NombreAppConfig'`.
+* Configurar la BBDD con la cadena de conexión:
 
 ```python
-[cite_start]import dj_database_url # [cite: 1546]
+import dj_database_url 
+
 # Sustituir la seccion DATABASES por esto:
 DATABASES = {
     'default': dj_database_url.config(
-        [cite_start]default='postgres://alumnodb:alumnodb@localhost:5432/examen', # [cite: 1548]
-        [cite_start]conn_max_age=500 # [cite: 1549]
+        default='postgres://usuario_bd:password_bd@localhost:5432/nombre_bd', 
+        conn_max_age=500 
     )
 }
 
 ```
 
-### TAREA 7: CREACIÓN DEL API REST CON DJANGO
+### MODELOS DE DATOS Y PANEL DE ADMINISTRACIÓN
+
+* Definir la estructura de la base de datos creando clases en el archivo de modelos.
+* Registrar estos modelos para poder gestionarlos cómodamente desde la URL `/admin/`.
+
+**CREACIÓN DE MODELOS (`nombre_app/models.py`):**
+
+```python
+from django.db import models
+
+class ModeloA(models.Model):
+    id = models.IntegerField(primary_key=True)
+    campo_ejemplo = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.campo_ejemplo
+
+class ModeloB(models.Model):
+    id = models.IntegerField(primary_key=True)
+    clave_foranea = models.ForeignKey(ModeloA, on_delete=models.CASCADE)
+    fecha_creacion = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Registro B - {self.id}"
+
+```
+
+**REGISTRO EN ADMINISTRACIÓN (`nombre_app/admin.py`):**
+
+```python
+from django.contrib import admin
+from .models import ModeloA, ModeloB
+
+# Registrar modelos básicos
+admin.site.register(ModeloA)
+admin.site.register(ModeloB)
+
+```
+
+### CREACIÓN DEL API REST CON DJANGO
 
 * Crear aplicación para la API: `python3 manage.py startapp api`.
-* En `project/settings.py`, añadir a `INSTALLED_APPS`: `'api.apps.ApiConfig'`, `'rest_framework'` y `'corsheaders'`.
+* En `nombre_proyecto/settings.py`, añadir a `INSTALLED_APPS`: `'api.apps.ApiConfig'`, `'rest_framework'` y `'corsheaders'`.
 * Añadir a `MIDDLEWARE` (lo más arriba posible): `'corsheaders.middleware.CorsMiddleware'`.
-* Añadir al final de `settings.py` para permitir peticiones desde Vue: `CORS_ALLOW_ALL_ORIGINS = True`.
+* Añadir al final de `settings.py` para permitir peticiones externas (CORS): `CORS_ALLOW_ALL_ORIGINS = True`.
 
 **SERIALIZADORES (`api/serializers.py`):**
 
-* Crear este archivo manualmente. Convierte los modelos en formato JSON.
+* Crear este archivo manualmente. Convierte los modelos de Python en formato JSON.
 
 ```python
 from rest_framework import serializers
-from application.models import Usuario, Canal, Suscripcion # Importar modelos reales
+from nombre_app.models import ModeloA, ModeloB # Importar los modelos creados en el Paso 3
 
-class UsuarioSerializer(serializers.ModelSerializer):
-    [cite_start]class Meta: # [cite: 1526]
-        [cite_start]model = Usuario # [cite: 1720]
-        [cite_start]fields = '__all__' # Coge todos los atributos [cite: 1722]
+class ModeloASerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = ModeloA 
+        fields = '__all__' # Expone todos los atributos del modelo
 
-# Repetir exactamente igual creando CanalSerializer y SuscripcionSerializer
+# Repetir la estructura para crear ModeloBSerializer
 
 ```
 
 **VISTAS DE LA API (`api/views.py`):**
 
-* Usaremos ModelViewSet para que genere GET, POST, PUT y DELETE automáticamente.
+* Usaremos `ModelViewSet` para que genere los métodos GET, POST, PUT y DELETE de forma automática.
 
 ```python
 from rest_framework import viewsets
-from application.models import Usuario, Canal, Suscripcion
-from .serializers import UsuarioSerializer, CanalSerializer, SuscripcionSerializer
+from nombre_app.models import ModeloA, ModeloB
+from .serializers import ModeloASerializer, ModeloBSerializer
 
-class UsuarioViewSet(viewsets.ModelViewSet):
-    [cite_start]queryset = Usuario.objects.all() # Obtener todos los registros [cite: 1535]
-    serializer_class = UsuarioSerializer
+class ModeloAViewSet(viewsets.ModelViewSet):
+    queryset = ModeloA.objects.all() # Obtener todos los registros disponibles
+    serializer_class = ModeloASerializer
 
-# Repetir exactamente igual creando CanalViewSet y SuscripcionViewSet
+# Repetir la estructura para crear ModeloBViewSet
 
 ```
 
-**URLS DE LA API (`project/urls.py`):**
+**URLS DE LA API (`nombre_proyecto/urls.py`):**
 
-* Conectar los ViewSets a la ruta `/api/v1/` que pide el enunciado.
+* Conectar los ViewSets a la ruta de la API requerida por el proyecto (ej. `/api/v1/`).
 
 ```python
 from django.contrib import admin
-[cite_start]from django.urls import path, include # [cite: 1509]
+from django.urls import path, include 
 from rest_framework.routers import DefaultRouter
 from api import views
 
-# Registrar rutas del API
+# Configurar el router del API REST
 router = DefaultRouter()
-router.register(r'usuarios', views.UsuarioViewSet)
-router.register(r'canales', views.CanalViewSet)
-router.register(r'suscripciones', views.SuscripcionViewSet)
+router.register(r'endpoint_modelo_a', views.ModeloAViewSet)
+router.register(r'endpoint_modelo_b', views.ModeloBViewSet)
 
 urlpatterns = [
-    [cite_start]path('admin/', admin.site.urls), # [cite: 1514]
-    path('application/', include('application.urls')), # Rutas normales de la app 
+    path('admin/', admin.site.urls), # Acceso al panel de administración del Paso 3
+    path('nombre_app/', include('nombre_app.urls')), # Rutas del frontend de Django si las hubiera
     path('api/v1/', include(router.urls)), # Rutas del API REST
 ]
 
 ```
 
-### TAREA 8: PROYECTO VUE.JS (FRONTEND)
+### PROYECTO VUE.JS (FRONTEND)
 
-* Crear proyecto Vue en otra terminal: `npm create vue@latest project_vue`.
-* Responder SÍ a incluir Cypress para testing.
-* Entrar a la carpeta: `cd project_vue` y ejecutar `npm install`.
+* Crear proyecto Vue en otra terminal: `npm create vue@latest nombre_proyecto_vue`.
+* Responder SÍ a incluir Cypress para testing E2E.
+* Entrar a la carpeta: `cd nombre_proyecto_vue` y ejecutar `npm install`.
 
 **COMPONENTE PRINCIPAL (`src/App.vue`):**
 
@@ -109,53 +148,52 @@ urlpatterns = [
 <script setup>
 import { ref, onMounted } from 'vue'
 
-// Variables reactivas
-const usuarios = ref([])
-const nuevoUsuario = ref({ id: '', nombreUsuario: '' }) // Adaptar a tu modelo
+// Variables reactivas para el estado del componente
+const registros = ref([])
+const nuevoRegistro = ref({ id: '', campo_ejemplo: '' }) 
 
-// GET: Obtener datos
-const fetchUsuarios = async () => {
-  const response = await fetch('http://localhost:8000/api/v1/usuarios/')
-  usuarios.value = await response.json()
+// GET: Obtener lista de datos
+const fetchRegistros = async () => {
+  const response = await fetch('http://localhost:8000/api/v1/endpoint_modelo_a/')
+  registros.value = await response.json()
 }
 
-// POST: Crear datos
-const addUsuario = async () => {
-  await fetch('http://localhost:8000/api/v1/usuarios/', {
+// POST: Crear nuevo dato
+const addRegistro = async () => {
+  await fetch('http://localhost:8000/api/v1/endpoint_modelo_a/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(nuevoUsuario.value)
+    body: JSON.stringify(nuevoRegistro.value)
   })
-  nuevoUsuario.value = { id: '', nombreUsuario: '' } // Limpiar formulario
-  fetchUsuarios() // Actualizar lista
+  nuevoRegistro.value = { id: '', campo_ejemplo: '' } // Limpiar formulario tras el envío
+  fetchRegistros() // Refrescar lista
 }
 
-// DELETE: Borrar datos
-const deleteUsuario = async (id) => {
-  await fetch(`http://localhost:8000/api/v1/usuarios/${id}/`, { method: 'DELETE' })
-  fetchUsuarios() // Actualizar lista
+// DELETE: Borrar un dato existente
+const deleteRegistro = async (id) => {
+  await fetch(`http://localhost:8000/api/v1/endpoint_modelo_a/${id}/`, { method: 'DELETE' })
+  fetchRegistros() // Refrescar lista
 }
 
-// Cargar al inicio
+// Ejecutar carga inicial
 onMounted(() => {
-  fetchUsuarios()
-  // Añadir fetchCanales() y fetchSuscripciones() aquí
+  fetchRegistros()
 })
 </script>
 
 <template>
   <main>
-    <h1>Gestión de Usuarios</h1>
+    <h1>Gestión de Registros</h1>
     
-    <input v-model="nuevoUsuario.id" placeholder="ID" id="input-id">
-    <input v-model="nuevoUsuario.nombreUsuario" placeholder="Nombre" id="input-nombre">
-    <button @click="addUsuario" id="btn-add">Añadir Usuario</button>
+    <input v-model="nuevoRegistro.id" placeholder="ID" id="input-id">
+    <input v-model="nuevoRegistro.campo_ejemplo" placeholder="Campo de texto" id="input-campo">
+    <button @click="addRegistro" id="btn-add">Añadir Registro</button>
 
     <table>
-      <tr v-for="usuario in usuarios" :key="usuario.id">
-        <td>{{ usuario.id }}</td>
-        <td>{{ usuario.nombreUsuario }}</td>
-        <td><button @click="deleteUsuario(usuario.id)" class="btn-delete">Eliminar</button></td>
+      <tr v-for="registro in registros" :key="registro.id">
+        <td>{{ registro.id }}</td>
+        <td>{{ registro.campo_ejemplo }}</td>
+        <td><button @click="deleteRegistro(registro.id)" class="btn-delete">Eliminar</button></td>
       </tr>
     </table>
   </main>
@@ -163,95 +201,88 @@ onMounted(() => {
 
 ```
 
-### TAREA 9: TESTS EN DJANGO
+### TESTS EN DJANGO (BACKEND)
 
-* El código debe ir dentro de la carpeta de la aplicación en el archivo `application/tests.py`.
-* Se ejecutan con: `python3 manage.py test application.tests`.
-* Estructura basada en `TestCase`.
+* El código debe ir dentro de la carpeta de la aplicación principal, en el archivo `nombre_app/tests.py`.
+* Se ejecutan con: `python3 manage.py test nombre_app.tests`.
 
-**ESTRUCTURA DEL TEST (`application/tests.py`):**
+**ESTRUCTURA DEL TEST (`nombre_app/tests.py`):**
 
 ```python
 from django.test import TestCase
-from application.models import Usuario, Canal, Suscripcion # Importar modelos
+from nombre_app.models import ModeloA, ModeloB # Importar modelos
 
-[cite_start]class ExamenViewsTest(TestCase): # [cite: 1792]
+class IntegracionViewsTest(TestCase): 
     
-    [cite_start]def setUp(self): # [cite: 1796] Se ejecuta antes de cada test
-        # 1. Borrar todo (aunque Django limpia BD de test, el enunciado lo pide explícito)
-        Suscripcion.objects.all().delete()
-        Canal.objects.all().delete()
-        Usuario.objects.all().delete()
+    def setUp(self): # Se ejecuta antes de lanzar cada test para preparar el entorno
+        # 1. Limpiar base de datos (buenas prácticas de testing)
+        ModeloB.objects.all().delete()
+        ModeloA.objects.all().delete()
         
-        # 2. Crear datos específicos del enunciado
-        [cite_start]self.u1 = Usuario.objects.create(id=1001, nombreUsuario='jordi') # [cite: 1767]
-        self.u2 = Usuario.objects.create(id=1002, nombreUsuario='nacho')
-        self.c1 = Canal.objects.create(id=1001, nombreCanal='wildproject')
+        # 2. Inyectar datos semilla (mock data)
+        self.m1 = ModeloA.objects.create(id=1, campo_ejemplo='valor_prueba_1') 
+        self.m2 = ModeloA.objects.create(id=2, campo_ejemplo='valor_prueba_2')
         
-        Suscripcion.objects.create(id=1001, canal=self.c1, usuario=self.u1, fechaDeSuscripcion='2025-03-08')
-        Suscripcion.objects.create(id=1002, canal=self.c1, usuario=self.u2, fechaDeSuscripcion='2025-01-07')
+        ModeloB.objects.create(id=1, clave_foranea=self.m1, fecha_creacion='2025-03-08')
 
-    [cite_start]def test_vista_suscripciones_canal(self): # [cite: 1770]
-        # 3. Acceder a la vista
-        response = self.client.get('/application/canal/1001')
+    def test_vista_renderiza_datos_correctamente(self): 
+        # 3. Simular petición HTTP a la vista
+        response = self.client.get('/nombre_app/ruta_especifica/1')
         
-        # [cite_start]4. Comprobaciones [cite: 1789, 1791]
-        self.assertEqual(response.status_code, 200) # Si la página existe
-        self.assertContains(response, 'jordi') # Comprueba que el HTML incluye el dato
-        self.assertContains(response, 'nacho')
+        # 4. Aserciones (Comprobaciones)
+        self.assertEqual(response.status_code, 200) # Verifica que devuelve un HTTP 200 OK
+        self.assertContains(response, 'valor_prueba_1') # Verifica el contenido del HTML
+        self.assertContains(response, 'valor_prueba_2')
 
 ```
 
-### TAREA 10: TESTS EN VUE CON CYPRESS
+### TESTS EN VUE CON CYPRESS (FRONTEND)
 
-* Se crea un archivo en el proyecto Vue: `project_vue/cypress/e2e/test_vue.cy.js`.
-* Se ejecuta con: `npx cypress run` o `npx cypress open` para interfaz gráfica.
-* Importante: Tanto el servidor de Django (`runserver`) como el de Vue (`npm run dev`) deben estar encendidos en paralelo.
+* Crear un archivo de especificaciones E2E: `nombre_proyecto_vue/cypress/e2e/test_frontend.cy.js`.
+* Se ejecuta con: `npx cypress run` (consola) o `npx cypress open` (interfaz gráfica).
+* *Aviso: Para que el test pase, tanto el backend (`runserver`) como el frontend (`npm run dev`) deben estar corriendo simultáneamente.*
 
-**CÓDIGO CYPRESS (`test_vue.cy.js`):**
+**CÓDIGO CYPRESS (`test_frontend.cy.js`):**
 
 ```javascript
-describe('Test CRUD de Usuarios en Vue', () => {
-  it('Añade y elimina usuarios correctamente', () => {
-    // 0. Visitar la web de Vue (asegurar el puerto correcto)
+describe('Test Flujo CRUD en Interfaz de Usuario', () => {
+  it('Debe permitir añadir y eliminar registros desde el DOM', () => {
+    // 0. Navegar a la aplicación (verificar el puerto en Vite/Vue)
     cy.visit('http://localhost:5173')
 
-    // 1. Crear usuario 'jordi' (usar los IDs definidos en el HTML)
-    cy.get('#input-id').type('1001')
-    cy.get('#input-nombre').type('jordi')
+    // 1. Simular la creación de un primer registro
+    cy.get('#input-id').type('1')
+    cy.get('#input-campo').type('valor_prueba_1')
     cy.get('#btn-add').click()
 
-    // 2. Crear usuario 'nacho'
-    cy.get('#input-id').clear().type('1002')
-    cy.get('#input-nombre').clear().type('nacho')
+    // 2. Simular la creación de un segundo registro
+    cy.get('#input-id').clear().type('2')
+    cy.get('#input-campo').clear().type('valor_prueba_2')
     cy.get('#btn-add').click()
 
-    // 3. Comprobar que se han renderizado en la tabla
-    cy.contains('jordi').should('exist')
-    cy.contains('nacho').should('exist')
+    // 3. Verificar reactividad: los datos deben estar en el DOM
+    cy.contains('valor_prueba_1').should('exist')
+    cy.contains('valor_prueba_2').should('exist')
 
-    // 4. Eliminar el usuario de nombre 'nacho'
-    // Busca la fila (tr) que contiene 'nacho' y hace click en su botón
-    cy.contains('tr', 'nacho').find('.btn-delete').click()
+    // 4. Simular borrado: localizar la fila de 'valor_prueba_2' y hacer click en su botón
+    cy.contains('tr', 'valor_prueba_2').find('.btn-delete').click()
 
-    // 5. Comprobar que ya no está en la tabla
-    cy.contains('nacho').should('not.exist')
+    // 5. Verificar que el elemento ha desaparecido del DOM
+    cy.contains('valor_prueba_2').should('not.exist')
   })
 })
 
 ```
 
-### COMANDOS FINALES DE CALIFICACIÓN
+### PASO 8: EJECUCIÓN Y COMPROBACIÓN FINAL
 
-Antes de entregar, debes ejecutar estos comandos en orden para asegurar que el evaluador puede probar tu código perfectamente:
+Para asegurar un despliegue limpio y funcional, y garantizar que la base de datos está correctamente sincronizada con los modelos, ejecuta esta secuencia de comandos:
 
-1. `dropdb -U alumnodb -h localhost examen` (Borra BD actual).
-2. `createdb -U alumnodb -h localhost examen` (Crea BD limpia).
-3. `python3 manage.py makemigrations` (Detecta cambios en Modelos).
-4. `python3 manage.py migrate` (Crea las tablas reales en PostgreSQL).
-5. `python3 manage.py createsuperuser` (Crear usuario `alumnodb`, pass `alumnodb`).
-6. `python3 populate_models.py` (Ejecutar el script que puebla con los datos del enunciado).
+1. `dropdb -U usuario_bd -h localhost nombre_bd` (Destruye la BD actual para empezar en limpio).
+2. `createdb -U usuario_bd -h localhost nombre_bd` (Crea una BD nueva y vacía).
+3. `python3 manage.py makemigrations` (Detecta y empaqueta los cambios en los modelos del Paso 3).
+4. `python3 manage.py migrate` (Aplica los cambios, creando las tablas reales en PostgreSQL).
+5. `python3 manage.py createsuperuser` (Crea el usuario administrador para poder acceder a `http://localhost:8000/admin`).
+6. `python3 script_poblacion.py` (Opcional: Ejecutar un script para cargar datos iniciales si el proyecto lo requiere).
 
-*Recordatorio: Para que Django detecte el script `populate_models.py` desde la raíz, este script debe contener el bloque `os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project.settings')` y `django.setup()` al principio.*
-
-
+Para usar un script externo de población de datos (test en django), recuerda que el archivo debe incluir la configuración inicial del entorno de Django (`os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nombre_proyecto.settings')` y `django.setup()`) en sus primeras líneas.*
