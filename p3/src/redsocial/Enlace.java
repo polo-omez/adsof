@@ -29,9 +29,13 @@ public class Enlace {
     return destino;
   }
 
+  public static int getSumaCoste() {
+    return sumaCoste;
+  }
+
   public void cambiarDestino(Usuario destino, int coste) {
     this.destino = destino;
-    sumaCoste -= coste;
+    sumaCoste -= this.coste;
     this.coste = this.actualizarCoste(coste);
 
   }
@@ -57,7 +61,7 @@ public class Enlace {
 
   @Override
   public String toString() {
-    return "@" + this.origen.getNombre() + "--" + this.coste + "-->" + "@"
+    return "(@" + this.origen.getNombre() + "--" + this.coste + "-->" + "@)"
         + this.destino.getNombre();
   }
 

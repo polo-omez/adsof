@@ -1,29 +1,92 @@
 @startuml
 
-' Configuración de estilo (opcional para que se vea más moderno)
+' Configuración de estilo
 skinparam classAttributeIconSize 0
 skinparam monochrome true
+skinparam linetype ortho
+' Separación horizontal mínima entre clases (por defecto suele ser muy pequeña)
+skinparam nodesep 100
 
-class Enlace{
-  -coste: int 
+' Separación vertical mínima entre niveles (filas)
+skinparam ranksep 80
 
+' --- Clases Básicas (Apartados 1, 2, 3) ---
+
+class RedSocial << Fachada >> {
+  + simular()
 }
 
-class Usuario{
-  -nombre: String
+class Enlace {
+  - coste: int
+  {static} - costeTotalAcumulado: int
+  --
+  + costeEspecial(): int
+  + costeReal(): int
+  + cambiarDestino(u: Usuario, coste: int)
 }
 
-class Mensaje{
-  -texto: String
-  -alcance: int
+class Usuario {
+  - nombre: String
+  - capacidadAmplificacion: int
+  --
+  + addEnlace(e: Enlace): boolean
 }
 
-' Relaciones
+class Mensaje {
+  - texto: String
+  - alcanceDisponible: int
+  --
+  + difunde(e: Enlace): boolean
+  + puedeDifundirPor(e: Enlace): boolean
+  + aceptadoPor(u: Usuario): boolean
+}
 
-Enlace --> "origen" Usuario 
-Enlace --> "destino" Usuario 
-Usuario o-- "* enlaces" Enlace
-Mensaje --* "contenedor" Usuario
+' --- Extensiones Apartado 6 ---
 
+enum Exposicion {
+  OCULTA
+  BAJA
+  MEDIA
+  ALTA
+  VIRAL
+}
+
+class EnlaceSenuelo {
+  - factorCosteExtra: double
+  - probabilidadRetorno: double
+  --
+  + costeEspecial(): int
+}
+
+class UsuarioInteresado {
+  --
+  ' Sobrescribirá la lógica de selección de enlace
+}
+
+class MensajeControlado {
+  - rigidez: int
+  --
+  + puedeDifundirPor(e: Enlace): boolean
+  + aceptadoPor(u: Usuario): boolean
+}
+
+' --- Relaciones de Herencia (Extends) ---
+Enlace <|-- EnlaceSenuelo
+Usuario <|-- UsuarioInteresado
+Mensaje <|-- MensajeControlado
+
+' --- Relaciones Estructurales ---
+RedSocial *-- "*" Mensaje
+RedSocial *-- "*" Usuario
+RedSocial *-- "*" Enlace
+
+Enlace -UP-> "1 origen" Usuario 
+Enlace -UP-> "1 destino" Usuario 
+
+Usuario o-LEFT- "*" Enlace : enlaces salientes >
+Usuario --> "1 exposicion" Exposicion
+Usuario o-- "*" Mensaje : historial recibido >
+
+Mensaje --> "1 usuarioActual" Usuario 
 
 @enduml
