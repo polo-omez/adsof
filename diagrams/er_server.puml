@@ -1,0 +1,76 @@
+@startuml
+top to bottom direction
+
+skinparam rectangle {
+    BackgroundColor #E8F8F5
+    BorderColor #117A65
+    FontName Arial
+    FontStyle bold
+}
+skinparam usecase {
+    BackgroundColor #FEF9E7
+    BorderColor #D4AC0D
+    FontName Arial
+}
+skinparam hexagon {
+    BackgroundColor #F4ECF7
+    BorderColor #8E44AD
+    FontName Arial
+    FontStyle bold
+}
+
+rectangle "ServerConfig" as SC
+rectangle "HttpServer" as HS
+rectangle "ThreadArgs" as TA
+rectangle "HttpHeader" as HH
+
+hexagon "CONTIENE" as R_CON
+hexagon "GESTIONA" as R_GES
+hexagon "GENERA" as R_GEN
+
+usecase "server_root" as SC_root
+usecase "listen_port" as SC_port
+usecase "max_clients" as SC_max
+usecase "server_signature" as SC_sig
+
+SC -- SC_root
+SC -- SC_port
+SC -- SC_max
+SC -- SC_sig
+
+usecase "sockfd" as HS_sock
+usecase "sem (sem_t)" as HS_sem
+
+HS -- HS_sock
+HS -- HS_sem
+
+usecase "clientfd" as TA_client
+usecase "*server (ptr)" as TA_server
+
+TA -- TA_client
+TA -- TA_server
+
+usecase "datebuff" as HH_date
+usecase "server_data" as HH_server
+usecase "last_modified" as HH_last
+usecase "content_lenght" as HH_len
+usecase "content_type" as HH_type
+usecase "html_status" as HH_stat
+
+HH -- HH_date
+HH -- HH_server
+HH -- HH_last
+HH -- HH_len
+HH -- HH_type
+HH -- HH_stat
+
+HS  "1" -down- R_CON
+R_CON -down- "1" SC
+
+HS "1" -down- R_GES
+R_GES -down- "0..N" TA
+
+TA "1" -down- R_GEN
+R_GEN -down- "1" HH
+
+@enduml
