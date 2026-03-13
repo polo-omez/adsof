@@ -61,8 +61,8 @@ public class Enlace {
 
   @Override
   public String toString() {
-    return "(@" + this.origen.getNombre() + "--" + this.coste + "-->" + "@)"
-        + this.destino.getNombre();
+    return "(@" + this.origen.getNombre() + "--" + this.coste + "-->" + "@"
+        + this.destino.getNombre() + ")";
   }
 
 }

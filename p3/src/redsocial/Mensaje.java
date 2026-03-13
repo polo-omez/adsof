@@ -25,15 +25,36 @@ public class Mensaje {
   }
 
   public boolean difunde(Enlace e) {
-    if (e.getOrigen() != this.usuarioActual || !puedeDifundirPor(e)) {
+    if (e.getOrigen() != this.usuarioActual || puedeDifundirPor(e) == false) {
       return false;
     }
+    Usuario destino = e.getDestino();
+    this.usuarioActual = destino;
+    this.alcanceDisponible += destino.getCapacidadAmplificacion() - e.getCoste();
     return true;
+  }
+
+  public boolean difunde(Usuario... usuarios) {
+    Usuario actual = this.usuarioActual;
+    boolean status = true;
+    Enlace e;
+
+    for (Usuario u : usuarios) {
+      if ((e = actual.getEnlace(u)) != null) {
+        if ((status = difunde(e)) != false) {
+          actual = u;
+        }
+      } else {
+        status = false;
+      }
+    }
+    return status;
 
   }
 
   public boolean puedeDifundirPor(Enlace e) {
     if (this.alcanceDisponible < e.getCoste()) {
+
       return false;
     }
     return true;
