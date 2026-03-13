@@ -2,20 +2,16 @@ Análisis y Diseño de Software
 
 **Curso 2025-2026** **Práctica 3: Introducción a la Programación Orientada a Objetos con Java** 
 
-* 
-**Inicio:** A partir del 23 de febrero. 
+* **Inicio:** A partir del 23 de febrero. 
 
 
-* 
-**Duración:** 3 semanas. 
+* **Duración:** 3 semanas. 
 
 
-* 
-**Entrega:** En Moodle, una hora antes del comienzo de la siguiente práctica según grupos (semana del 16 de marzo). 
+* **Entrega:** En Moodle, una hora antes del comienzo de la siguiente práctica según grupos (semana del 16 de marzo). 
 
 
-* 
-**Peso de la práctica:** 20% 
+*  **Peso de la práctica:** 20% 
 
 
 
@@ -56,12 +52,10 @@ Además, implementa un `toString()` que muestre de forma concisa los valores del
 
 En previsión de ampliaciones (apartado 6), añade dos métodos simples:
 
-* 
-`int costeEspecial()` que devolverá 0 (solo los enlaces especiales definidos en el futuro tendrán coste especial distinto de cero). 
+* `int costeEspecial()` que devolverá 0 (solo los enlaces especiales definidos en el futuro tendrán coste especial distinto de cero). 
 
 
-* 
-`int costeReal()` que siempre será la suma del coste del enlace más su coste especial. 
+* `int costeReal()` que siempre será la suma del coste del enlace más su coste especial. 
 
 
 
@@ -88,16 +82,13 @@ Una vez creado el usuario, se le podrán añadir enlaces mediante sucesivas llam
 
 Como en otras clases, no se dispondrá de setters, pero sí de getters y de un método `toString()`.  Además de los getters para nombre y capacidad de amplificación, deberá implementarse:
 
-* 
-`getEnlace(int i)` para acceder al i-ésimo enlace de la secuencia de enlaces salientes del usuario. 
+* `getEnlace(int i)` para acceder al i-ésimo enlace de la secuencia de enlaces salientes del usuario. 
 
 
-* 
-`int getNumEnlaces()` para obtener el número total de enlaces salientes. 
+* `int getNumEnlaces()` para obtener el número total de enlaces salientes. 
 
 
-* 
-`Enlace getEnlace(Usuario destino)` para obtener el enlace directo desde este usuario hacia otro dado, o `null` si no existe tal conexión. 
+* `Enlace getEnlace(Usuario destino)` para obtener el enlace directo desde este usuario hacia otro dado, o `null` si no existe tal conexión. 
 
 
 
@@ -120,12 +111,10 @@ Además del constructor, los getters y un `toString()` que devuelva `"Mensaje (m
 
 Para facilitar estas comprobaciones se implementarán dos métodos:
 
-* 
-`boolean puedeDifundirPor(Enlace e)`, que devolverá `true` si y solo si el alcance del mensaje es mayor o igual que el coste real del enlace. 
+* `boolean puedeDifundirPor(Enlace e)`, que devolverá `true` si y solo si el alcance del mensaje es mayor o igual que el coste real del enlace. 
 
 
-* 
-`boolean aceptadoPor(Usuario u)`, que por ahora devolverá siempre `true` y se utilizará para futuras extensiones. 
+* `boolean aceptadoPor(Usuario u)`, que por ahora devolverá siempre `true` y se utilizará para futuras extensiones. 
 
 
 
@@ -284,20 +273,16 @@ Apartado 6. Otras clases de enlaces, usuarios y mensajes (2.5 puntos)
 
 Vamos a extender las clases descritas arriba de forma que existan enlaces, usuarios y mensajes con atributos o comportamientos especializados según describimos a continuación. Estas extensiones se diseñan para introducir variaciones en la dinámica de propagación que permitan simular fenómenos más ricos y realistas. La idea es que el código desarrollado en los apartados anteriores se mantenga válido y operativo, de modo que estas nuevas clases amplíen el sistema sin romper su funcionamiento básico. 
 
-* 
-**Enlace Señuelo:** Tal y como se mencionó en el Apartado 1, extenderemos la clase `Enlace` para introducir un nuevo tipo de enlace especial que denominaremos enlace señuelo. Un enlace señuelo se crea igual que un enlace normal, pero recibe dos parámetros adicionales: un factor de coste extra y una probabilidad de retorno obligado. Así, el coste especial (ver Apartado 1) asociado al enlace señuelo se calculará como el producto del coste original por dicho factor extra, de forma que el coste real (el que se descuenta del alcance del mensaje) se calculará sumando el coste de propagación y el coste especial. Por otro lado, la probabilidad de retorno obligado indica con qué probabilidad la difusión no llevará al mensaje al usuario destino especificado, sino que lo devolverá al usuario origen, simulando un comportamiento engañoso o de retroceso en la propagación. 
+* **Enlace Señuelo:** Tal y como se mencionó en el Apartado 1, extenderemos la clase `Enlace` para introducir un nuevo tipo de enlace especial que denominaremos enlace señuelo. Un enlace señuelo se crea igual que un enlace normal, pero recibe dos parámetros adicionales: un factor de coste extra y una probabilidad de retorno obligado. Así, el coste especial (ver Apartado 1) asociado al enlace señuelo se calculará como el producto del coste original por dicho factor extra, de forma que el coste real (el que se descuenta del alcance del mensaje) se calculará sumando el coste de propagación y el coste especial. Por otro lado, la probabilidad de retorno obligado indica con qué probabilidad la difusión no llevará al mensaje al usuario destino especificado, sino que lo devolverá al usuario origen, simulando un comportamiento engañoso o de retroceso en la propagación. 
 
 
-* 
-**Exposición Pública de Usuarios:** Para ampliar el comportamiento de los usuarios modificaremos la clase `Usuario` (del Apartado 2) añadiendo un nuevo atributo que represente su nivel de exposición pública, es decir, cuán visible o accesible es para la recepción de mensajes. Esta exposición tomará uno de los valores: `OCULTA`, `BAJA`, `MEDIA`, `ALTA`, `VIRAL`, dispuestos en orden creciente. Para mantener compatibilidad con el código ya implementado, los constructores existentes conservarán su comportamiento actual, asignando por defecto una exposición `ALTA`. Añadiremos también un nuevo constructor que permita especificar este valor explícitamente, así como un método `void cambiarExposicion(Exposicion e)` para modificarlo durante la ejecución. 
+* **Exposición Pública de Usuarios:** Para ampliar el comportamiento de los usuarios modificaremos la clase `Usuario` (del Apartado 2) añadiendo un nuevo atributo que represente su nivel de exposición pública, es decir, cuán visible o accesible es para la recepción de mensajes. Esta exposición tomará uno de los valores: `OCULTA`, `BAJA`, `MEDIA`, `ALTA`, `VIRAL`, dispuestos en orden creciente. Para mantener compatibilidad con el código ya implementado, los constructores existentes conservarán su comportamiento actual, asignando por defecto una exposición `ALTA`. Añadiremos también un nuevo constructor que permita especificar este valor explícitamente, así como un método `void cambiarExposicion(Exposicion e)` para modificarlo durante la ejecución. 
 
 
-* 
-**Historial de Usuarios:** Añade la posibilidad de que cada usuario memorice qué mensajes le han llegado. Cada vez que un usuario reciba un mensaje, deberá registrar dicho mensaje en su historial y ajustar su exposición: si el mensaje llega con un alcance mayor que el promedio de alcances de los mensajes que ha recibido hasta ese momento, aumentará su exposición en un nivel;  en caso contrario, la disminuirá en un nivel. Realiza un programa que pruebe esta nueva funcionalidad. 
+* **Historial de Usuarios:** Añade la posibilidad de que cada usuario memorice qué mensajes le han llegado. Cada vez que un usuario reciba un mensaje, deberá registrar dicho mensaje en su historial y ajustar su exposición: si el mensaje llega con un alcance mayor que el promedio de alcances de los mensajes que ha recibido hasta ese momento, aumentará su exposición en un nivel;  en caso contrario, la disminuirá en un nivel. Realiza un programa que pruebe esta nueva funcionalidad. 
 
 
-* 
-**Usuario Interesado:** Introduce un `UsuarioInteresado` que preserve el orden de creación de enlaces, pero está interesado en difundir los mensajes por el primer enlace de su lista cuyo usuario destino tenga alta exposición. En concreto, el `UsuarioInteresado` seleccionará el enlace de forma diferente a la estándar: elegirá el primer enlace de su lista cuyo destino tenga exposición `ALTA` o `VIRAL` (independientemente del destino de dicho enlace), si no lo hay, realizará el comportamiento estándar (búsqueda del enlace directo respetando el orden y el destino). 
+* **Usuario Interesado:** Introduce un `UsuarioInteresado` que preserve el orden de creación de enlaces, pero está interesado en difundir los mensajes por el primer enlace de su lista cuyo usuario destino tenga alta exposición. En concreto, el `UsuarioInteresado` seleccionará el enlace de forma diferente a la estándar: elegirá el primer enlace de su lista cuyo destino tenga exposición `ALTA` o `VIRAL` (independientemente del destino de dicho enlace), si no lo hay, realizará el comportamiento estándar (búsqueda del enlace directo respetando el orden y el destino). 
 
 
 * **Mensaje Controlado:** Añadiremos un tipo especial de mensaje denominado `MensajeControlado`. Mientras que un mensaje básico utiliza solamente su alcance para decidir si puede o no propagarse, un mensaje controlado incorpora un atributo numérico adicional llamado rigidez, que representa cuán estricta es su política de difusión. Un mensaje controlado no podrá propagarse nunca por enlaces señuelo, independientemente de que su alcance sea suficiente. Además, la posibilidad de llegar a un usuario dependerá tanto del alcance como del nivel de exposición del usuario destino: en términos generales, un mensaje controlado solo podrá llegar a usuarios con exposición suficiente (determinada por su rigidez). Si la exposición es `OCULTA`, la rigidez puede ser cualquiera; si es `BAJA`, la rigidez debe ser 5 o más; para `MEDIA` debe ser 10 o más; para `ALTA` 20 o más; y para `VIRAL` 50 o más. La lógica concreta de estas restricciones deberá estar integrada en los métodos `puedeDifundirPor` y `aceptadoPor`. 
