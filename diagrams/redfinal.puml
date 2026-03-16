@@ -1,0 +1,111 @@
+@startuml
+
+' Configuración de estilo
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+
+
+' --- Clases Básicas ---
+
+class RedSocial << Fachada >> {
+  - usuarios: Map<String, Usuario>
+  - enlaces: List<Enlace>
+  - mensajes: List<Mensaje>
+  - mensajeInicial: Mensaje
+  - secuenciaInicial: List<Usuario>
+  --
+  + registrarUsuario(nombre: String, amplificacion: int)
+  + crearEnlace(nombreOrigen: String, nombreDestino: String, coste: int)
+  + crearMensaje(texto: String, alcance: int, nombreOrigen: String)
+  + simular()
+  + guardarRed(fUsuarios: String, fEnlaces: String, fMensajes: String)
+}
+
+class Enlace {
+  - origen: Usuario
+  - destino: Usuario
+  - coste: int
+  {static} - sumaCoste: int
+  --
+  + cambiarDestino(destino: Usuario, coste: int)
+  + costeEspecial(): int
+  + costeReal(): int
+}
+
+class Usuario {
+  - nombre: String
+  - capacidadAmplificacion: int
+  - enlaces: List<Enlace>
+  - exposicion: Exposicion
+  - historial: List<Mensaje>
+  --
+  + getEnlace(destino: Usuario): Enlace
+  + addEnlace(e: Enlace): boolean
+  + addEnlace(destino: Usuario, coste: int): boolean
+  + recibirMensaje(m: Mensaje)
+}
+
+class Mensaje {
+  - texto: String
+  - alcanceDisponible: int
+  - usuarioActual: Usuario
+  --
+  + difunde(e: Enlace): boolean
+  + difunde(usuarios: Usuario...): boolean
+  + puedeDifundirPor(e: Enlace): boolean
+  + aceptadoPor(u: Usuario): boolean
+}
+
+' --- Extensiones ---
+
+enum Exposicion {
+  OCULTA
+  BAJA
+  MEDIA
+  ALTA
+  VIRAL
+}
+
+class EnlaceSeñuelo {
+  - factorExtra: double
+  - probRetorno: double
+  {static} - random: Random
+  --
+  + costeEspecial(): int
+  + getDestino(): Usuario
+}
+
+class UsuarioInteresado {
+  --
+  + getEnlace(destino: Usuario): Enlace
+}
+
+class MensajeControlado {
+  - rigidez: int
+  --
+  + puedeDifundirPor(e: Enlace): boolean
+  + aceptadoPor(u: Usuario): boolean
+}
+
+' --- Relaciones de Herencia (Extends) ---
+Enlace <|-- EnlaceSeñuelo
+Usuario <|-- UsuarioInteresado
+Mensaje <|-- MensajeControlado
+
+' --- Relaciones Estructurales ---
+RedSocial *-- "*" Mensaje : contiene >
+RedSocial *-- "*" Usuario : contiene >
+RedSocial *-- "*" Enlace : contiene >
+RedSocial --> "1" Mensaje : mensajeInicial >
+RedSocial --> "*" Usuario : secuenciaInicial >
+
+Enlace --> "1" Usuario : origen >
+Enlace --> "1" Usuario : destino >
+
+Usuario o-- "*" Enlace : enlaces salientes >
+Usuario --> "1" Exposicion : nivel de exposicion >
+Usuario o-- "*" Mensaje : historial >
+
+Mensaje --> "1" Usuario : usuarioActual >
+
+@enduml

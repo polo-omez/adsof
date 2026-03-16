@@ -18,14 +18,14 @@ tasks.withType(Javadoc) {
 }
 
 application {
-    mainClass = 'redsocial.EjemploUsoRedSocial' 
+    mainClass = 'redsocial.pruebas.EjemploUsoRedSocial' 
 }
 
 task runBasicos(type: JavaExec) {
     group = 'Execution'
     description = 'Ejecuta el programa EjemploUsoMensajesBasicos'
     classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'redsocial.EjemploUsoMensajesBasicos'
+    mainClass = 'redsocial.pruebas.EjemploUsoMensajesBasicos'
 }
 
 // Tarea para ejecutar las pruebas del simulador
@@ -35,3 +35,45 @@ task runRedSocial(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'redsocial.EjemploUsoRedSocial'
 } 
+
+// 1. Buscamos los archivos de prueba en la fase de configuración
+def arbolArchivos = fileTree('src/redsocial/pruebas') {
+    include '**/*.java'
+}
+
+def listaDeTareas = []
+
+// 2. Por cada archivo, creamos una tarea JavaExec específica
+arbolArchivos.each { File archivo ->
+    def nombreSimple = archivo.name.replace('.java', '')
+    def paqueteYClase = "redsocial.pruebas.${nombreSimple}"
+    def nombreTarea = "run_${nombreSimple}" // Ej: run_PruebaEnlaces
+    
+    tasks.register(nombreTarea, JavaExec) {
+        dependsOn classes
+        mainClass = paqueteYClase
+        classpath = sourceSets.main.runtimeClasspath
+        
+        // Imprimimos el separador justo antes de que arranque esta clase
+        doFirst {
+            println "\n======================================================="
+            println "▶ EJECUTANDO: $paqueteYClase"
+            println "======================================================="
+        }
+    }
+    listaDeTareas.add(nombreTarea)
+}
+
+// 3. Creamos la tarea principal que simplemente depende de todas las anteriores
+task runPruebas {
+    group = 'Execution'
+    description = 'Ejecuta todas las clases con main dentro del paquete redsocial.pruebas'
+    dependsOn listaDeTareas
+}
+
+
+javadoc {
+    options.author = true     // Obliga a mostrar la etiqueta @author
+    options.version = true    // Obliga a mostrar la etiqueta @version
+    options.encoding = 'UTF-8' // Vital para que las tildes (Gómez, Señuelo) se vean bien en el HTML
+}
