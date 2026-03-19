@@ -1,0 +1,117 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+' ==========================================
+' INTERFACES
+' ==========================================
+interface ISensor {
+    + getIdentificador(): String
+    + medir()
+    + calibrar(offset: double)
+    + estaCalibrado(): boolean
+}
+
+interface IUnidad {
+    + getSimbolo(): String
+}
+
+' ==========================================
+' CLASE ABSTRACTA
+' ==========================================
+abstract class SensorMeteorologico {
+    - id: String
+    - offsetCalibracion: double
+    - ultimaLectura: double
+    - fechaUltimaLectura: LocalDateTime
+    - fechaInstalacion: LocalDateTime
+}
+
+' ==========================================
+' CLASES HIJAS (SENSORES CONCRETOS)
+' ==========================================
+class SensorTemperatura {
+    {static} - contador: int
+    + cambiarUnidad(u: UnidadTemperatura)
+}
+
+class SensorHumedad {
+    {static} - contador: int
+}
+
+class SensorPresionAtmosferica {
+    {static} - contador: int
+}
+
+' ==========================================
+' ENUMERACIONES
+' ==========================================
+enum UnidadTemperatura <<enumeration>> {
+    CELSIUS
+    FAHRENHEIT
+    KELVIN
+    --
+    + getSimbolo(): String
+}
+
+enum UnidadHumedad <<enumeration>> {
+    PORCENTAJE
+    --
+    + getSimbolo(): String
+}
+
+enum UnidadPresionAtmosferica <<enumeration>> {
+    HECTOPASCALES
+    PASCALES
+    MILIVARES
+    --
+    + getSimbolo(): String
+}
+
+' ==========================================
+' CLASES AUXILIARES Y ESTACIÓN
+' ==========================================
+class EstacionMeteorologica {
+    - nombre: String
+    + addSensor(sensor: ISensor)
+    + lanzarMedicion(fecha: LocalDateTime)
+    + medicionPeriodica(horasIntervalo: double, lecturasMaximas: int)
+    + getSensor(id: String): ISensor
+    + getSensoresTemperatura(): List<SensorTemperatura>
+    + getSensoresHumedad(): List<SensorHumedad>
+    + getSensoresPresion(): List<SensorPresionAtmosferica>
+}
+
+class Ubicacion {
+    - latitud: double
+    - longitud: double
+}
+
+class Rango {
+    - valorMinimo: double
+    - valorMaximo: double
+    + enRango(valor: double): boolean
+}
+
+' ==========================================
+' RELACIONES
+' ==========================================
+
+' Implementaciones (Realization) -> Línea punteada con flecha hueca
+ISensor <|.. SensorMeteorologico
+IUnidad <|.. UnidadTemperatura
+IUnidad <|.. UnidadHumedad
+IUnidad <|.. UnidadPresionAtmosferica
+
+' Herencia (Extension) -> Línea continua con flecha hueca
+SensorMeteorologico <|-- SensorTemperatura
+SensorMeteorologico <|-- SensorHumedad
+SensorMeteorologico <|-- SensorPresionAtmosferica
+
+' Agregación y Composición
+EstacionMeteorologica o- "many" ISensor : sensores: Map<String, ISensor>
+EstacionMeteorologica *-- "1" Ubicacion : ubicacionGeografica
+
+' Asociaciones dirigidas
+SensorMeteorologico --> "1" Rango : rangoValores
+SensorMeteorologico --> "1" IUnidad : unidadDeLectura
+@enduml
