@@ -2,71 +2,123 @@
 skinparam classAttributeIconSize 0
 
 ' ==========================================
-' INTERFACES
+' SENSORES
 ' ==========================================
-interface ISensor {
-    + getIdentificador(): String
-    + medir()
-    + calibrar(offset: double)
-    + estaCalibrado(): boolean
-}
 
-interface IUnidad {
-    + getSimbolo(): String
+' ==INTERFACES==
+package "sensores" <<Frame>> #DDDDDD{
+  interface ISensor {
+      + getIdentificador(): String
+      + medir()
+      + calibrar(offset: double)
+      + estaCalibrado(): boolean
+  }
+
+  interface IUnidad {
+      + getSimbolo(): String
+  }
+
+  ' ==CLASES==
+  abstract class SensorMeteorologico {
+      - id: String
+      - offsetCalibracion: double
+      - ultimaLectura: double
+      - fechaUltimaLectura: LocalDateTime
+      - fechaInstalacion: LocalDateTime
+  }
+
+  class SensorTemperatura {
+      {static} - contador: int
+      + cambiarUnidad(u: UnidadTemperatura)
+  }
+
+  class SensorHumedad {
+      {static} - contador: int
+  }
+
+  class SensorPresionAtmosferica {
+      {static} - contador: int
+  }
+
+  class Rango {
+      - valorMinimo: double
+      - valorMaximo: double
+      + enRango(valor: double): boolean
+  }
+
+
+  ' ==ENUMERACIONES==
+  enum UnidadTemperatura <<enumeration>> {
+      CELSIUS
+      FAHRENHEIT
+      KELVIN
+      --
+      + getSimbolo(): String
+  }
+
+  enum UnidadHumedad <<enumeration>> {
+      PORCENTAJE
+      --
+      + getSimbolo(): String
+  }
+
+  enum UnidadPresionAtmosferica <<enumeration>> {
+      HECTOPASCALES
+      PASCALES
+      MILIBARES
+      --
+      + getSimbolo(): String
+  }
+
+
 }
 
 ' ==========================================
-' CLASE ABSTRACTA
+' PROCESAMIENTO
 ' ==========================================
-abstract class SensorMeteorologico {
-    - id: String
-    - offsetCalibracion: double
-    - ultimaLectura: double
-    - fechaUltimaLectura: LocalDateTime
-    - fechaInstalacion: LocalDateTime
+package "procesamiento" <<Frame>> #DDDDDD {
+
+'==INTERFACES== 
+interface IConversor{
+  + getUnidadOrigen(): IUnidad;
+  + getUnidadDestino(): IUnidad;
+  + convertir(valor: double): double;
 }
 
-' ==========================================
-' CLASES HIJAS (SENSORES CONCRETOS)
-' ==========================================
-class SensorTemperatura {
-    {static} - contador: int
-    + cambiarUnidad(u: UnidadTemperatura)
+'==CLASES== 
+    class ProcesadorDatos {
+        + registrarLectura(valor: double)
+        + getMedia(): double
+        + getMinimo(): double
+        + getMaximo(): double
+    }
+    class Lectura {
+        - valor: double
+        - fechaHora: LocalDateTime
+    }
+
+    class ConversorIdentidad {
+    }
+
+    class ConversorCelsiusKelvin {
+        - origen: UnidadTemperatura
+        - destino: UnidadTemperatura
+    }
+    
+    class ConversorHpaPa {
+        - origen: UnidadPresionAtmosferica
+        - destino: UnidadPresionAtmosferica
+    }
+
+    class ConversorConcatenado {
+    }
+
 }
 
-class SensorHumedad {
-    {static} - contador: int
-}
 
-class SensorPresionAtmosferica {
-    {static} - contador: int
-}
-
-' ==========================================
-' ENUMERACIONES
-' ==========================================
-enum UnidadTemperatura <<enumeration>> {
-    CELSIUS
-    FAHRENHEIT
-    KELVIN
-    --
-    + getSimbolo(): String
-}
-
-enum UnidadHumedad <<enumeration>> {
-    PORCENTAJE
-    --
-    + getSimbolo(): String
-}
-
-enum UnidadPresionAtmosferica <<enumeration>> {
-    HECTOPASCALES
-    --
-    + getSimbolo(): String
-}
 
 ' ==========================================
-' CLASES AUXILIARES Y ESTACIÓN
+' METEREOLOGIA
 ' ==========================================
 class EstacionMeteorologica {
     - nombre: String
@@ -82,32 +134,74 @@ class Ubicacion {
     - longitud: double
 }
 
-class Rango {
-    - valorMinimo: double
-    - valorMaximo: double
-    + enRango(valor: double): boolean
-}
 
+
+' ==========================================
+' ESTRATEGIAS
+' ==========================================
+
+package "estrategias" <<Frame>> #DDDDDD{
+  interface IEstrategia{
+    + generarValor(): double
+  }
+
+  class EstrategiaGeneracionEnRango {
+    - minimo: double
+    - maximo: double
+    - probabilidadDesborde: double
+
+  }
+
+  class EstrategiaGeneracionSimilar {
+    - porcentajeDesviacion: double
+
+  }
+
+  class EstrategiaGeneracionEnMedia{
+    - porcentajeDesviacion: double
+
+  }
+}
 ' ==========================================
 ' RELACIONES
 ' ==========================================
 
 ' Implementaciones (Realization) -> Línea punteada con flecha hueca
 ISensor <|.. SensorMeteorologico
+
 IUnidad <|.. UnidadTemperatura
 IUnidad <|.. UnidadHumedad
 IUnidad <|.. UnidadPresionAtmosferica
 
-' Herencia (Extension) -> Línea continua con flecha hueca
+IEstrategia <|.. EstrategiaGeneracionEnRango 
+IEstrategia <|.. EstrategiaGeneracionSimilar
+IEstrategia <|.. EstrategiaGeneracionEnMedia 
+
+IConversor <|.. ConversorIdentidad
+IConversor <|.. ConversorCelsiusKelvin 
+IConversor <|.. ConversorHpaPa 
+IConversor <|. ConversorConcatenado 
+
+' Herencia (Extension) --> Línea continua con flecha hueca
 SensorMeteorologico <|-- SensorTemperatura
 SensorMeteorologico <|-- SensorHumedad
 SensorMeteorologico <|-- SensorPresionAtmosferica
 
 ' Agregación y Composición
-EstacionMeteorologica o- "many" ISensor : sensores: Map<String, ISensor>
+EstacionMeteorologica o-- "*" ISensor : sensores: Map<String, ISensor>
 EstacionMeteorologica *-- "1" Ubicacion : ubicacionGeografica
 
+SensorMeteorologico *--  ProcesadorDatos : "procesador"
+
+ProcesadorDatos *-- "*" Lectura: historial
+ConversorConcatenado o-- IConversor: conversorOrigen 
+ConversorConcatenado o-- IConversor: conversorDestino
+
 ' Asociaciones dirigidas
-SensorMeteorologico --> "1" Rango : rangoValores
-SensorMeteorologico --> "1" IUnidad : unidadDeLectura
+SensorMeteorologico -->  Rango : rangoValores
+SensorMeteorologico -->  IUnidad : unidadDeLectura
+SensorMeteorologico -up-> IEstrategia: estrategiaGeneracion
+
+ProcesadorDatos -->  IConversor: conversor
+
 @enduml
