@@ -61,8 +61,6 @@ enum UnidadHumedad <<enumeration>> {
 
 enum UnidadPresionAtmosferica <<enumeration>> {
     HECTOPASCALES
-    PASCALES
-    MILIVARES
     --
     + getSimbolo(): String
 }
@@ -76,9 +74,7 @@ class EstacionMeteorologica {
     + lanzarMedicion(fecha: LocalDateTime)
     + medicionPeriodica(horasIntervalo: double, lecturasMaximas: int)
     + getSensor(id: String): ISensor
-    + getSensoresTemperatura(): List<SensorTemperatura>
-    + getSensoresHumedad(): List<SensorHumedad>
-    + getSensoresPresion(): List<SensorPresionAtmosferica>
+    + getSensores(tipo: Class<?>): List<ISensor>
 }
 
 class Ubicacion {

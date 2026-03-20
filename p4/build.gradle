@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+}
+
+group = 'meteorologia'
+version = '1.0-SNAPSHOT'
+
+// Usamos Java 17 (puedes cambiarlo a 21 si usas esa versión)
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Librerías de JUnit 5 para hacer las pruebas
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+// Configuración vital para que Gradle ejecute los tests de JUnit 5
+tasks.named('test') {
+    useJUnitPlatform()
+    
+    // Opcional: Esto hace que por consola veas si los tests pasan o fallan mientras se ejecutan
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+// Configuración para generar el Javadoc con vuestros nombres y tildes
+javadoc {
+    options.author = true
+    options.version = true
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+}

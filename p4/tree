@@ -1,0 +1,28 @@
+.
+├── enunciadoP4.md
+├── gradle
+│   ├── libs.versions.toml
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── settings.gradle
+├── src
+│   ├── alertas
+│   ├── estrategias
+│   ├── formato
+│   ├── procesamiento
+│   ├── pruebas
+│   ├── sensores
+│   └── test
+│       └── meteorologia
+│           ├── apartado1
+│           ├── apartado2
+│           ├── apartado3
+│           ├── apartado4
+│           └── apartado5
+└── tree
+
+17 directories, 9 files
