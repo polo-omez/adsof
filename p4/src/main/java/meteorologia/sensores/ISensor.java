@@ -8,6 +8,8 @@ public interface ISensor {
 
   public LocalDateTime getFechaInstalacion();
 
+  public void setFechaInstalacion(LocalDateTime fecha);
+
   public void medir();
 
   public void calibrar(double offset);
