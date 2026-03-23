@@ -1,14 +1,14 @@
 package meteorologia.sensores;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public interface ISensor {
 
   public String getIdentificador();
 
-  public LocalDateTime getFechaInstalacion();
+  public LocalDate getFechaInstalacion();
 
-  public void setFechaInstalacion(LocalDateTime fecha);
+  public void setFechaInstalacion(LocalDate fecha);
 
   public void medir();
 

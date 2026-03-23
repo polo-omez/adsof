@@ -16,4 +16,9 @@ public class Ubicacion {
   public double getLongitud() {
     return longitud;
   }
+
+  @Override
+  public String toString() {
+    return this.latitud + " latitud, " + this.longitud + " longitud";
+  }
 }

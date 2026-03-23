@@ -17,8 +17,9 @@ repositories {
 
 dependencies {
     // Librerías de JUnit 5 para hacer las pruebas
-    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -33,6 +34,41 @@ tasks.named('test') {
     testLogging {
         events "passed", "skipped", "failed"
     }
+}
+
+
+def arbolArchivos = fileTree('src/main/java/meteorologia/pruebas') {
+    include '**/*.java'
+}
+
+def listaDeTareas = []
+
+// 2. Por cada archivo, creamos una tarea JavaExec específica
+arbolArchivos.each { File archivo ->
+    def nombreSimple = archivo.name.replace('.java', '')
+    def paqueteYClase = "meteorologia.pruebas.${nombreSimple}"
+    def nombreTarea = "run_${nombreSimple}" // Ej: run_PruebaEnlaces
+    
+    tasks.register(nombreTarea, JavaExec) {
+        dependsOn classes
+        mainClass = paqueteYClase
+        classpath = sourceSets.main.runtimeClasspath
+        
+        // Imprimimos el separador justo antes de que arranque esta clase
+        doFirst {
+            println "\n======================================================="
+            println "▶ EJECUTANDO: $paqueteYClase"
+            println "======================================================="
+        }
+    }
+    listaDeTareas.add(nombreTarea)
+}
+
+// 3. Creamos la tarea principal que simplemente depende de todas las anteriores
+task runPruebas {
+    group = 'Execution'
+    description = 'Ejecuta todas las clases con main dentro del paquete meteorologia.pruebas'
+    dependsOn listaDeTareas
 }
 
 // Configuración para generar el Javadoc con vuestros nombres y tildes

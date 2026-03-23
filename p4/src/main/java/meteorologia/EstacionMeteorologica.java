@@ -2,17 +2,17 @@ package meteorologia;
 
 import java.util.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import meteorologia.sensores.ISensor;
 import meteorologia.excepciones.*;
 
-public class EstacionMetereologica {
+public class EstacionMeteorologica {
   private String nombre;
   private Ubicacion ubicacionGeografica;
   private Map<String, ISensor> sensores;
 
-  public EstacionMetereologica(String nombre, double latitud, double longitud) {
+  public EstacionMeteorologica(String nombre, double latitud, double longitud) {
     this.nombre = nombre;
     this.ubicacionGeografica = new Ubicacion(latitud, longitud);
     this.sensores = new HashMap<>();
@@ -22,7 +22,16 @@ public class EstacionMetereologica {
     return nombre;
   }
 
+  public Map<String, ISensor> getSensoresMap() {
+    return this.sensores;
+  }
+
   public void addSensor(ISensor sensor) throws SensorDuplicadoException {
+    this.addSensor(sensor, LocalDate.now());
+
+  }
+
+  public void addSensor(ISensor sensor, LocalDate fechaInstalacion) throws SensorDuplicadoException {
     String sensorId = sensor.getIdentificador();
 
     if (sensores.containsKey(sensorId)) {
@@ -31,8 +40,7 @@ public class EstacionMetereologica {
 
     }
     sensores.put(sensor.getIdentificador(), sensor);
-    sensor.setFechaInstalacion(LocalDateTime.now());
-
+    sensor.setFechaInstalacion(fechaInstalacion);
   }
 
   public ISensor getSensor(String sensorId) throws SensorNoEncontradoException {
@@ -51,6 +59,29 @@ public class EstacionMetereologica {
     }
 
     return sensoresTipo;
-
   }
+
+  public void lanzarMedicion() {
+    for (ISensor sensor : this.sensores.values()) {
+      sensor.medir();
+    }
+  }
+
+  public void medicionPeriodica(double horasIntervalo, int lecturasMaximas) {
+    return;
+  }
+
+  @Override
+  public String toString() {
+
+    StringJoiner sensoresList = new StringJoiner(",\n", "[", "]");
+    for (ISensor sensor : this.sensores.values()) {
+      sensoresList
+          .add(sensor.getIdentificador() + " (desde: " + sensor.getFechaInstalacion() + ") " + sensor.toString());
+    }
+
+    return "Estacion Meteorologica: " + this.nombre + "\nUbicacion: " + this.ubicacionGeografica.toString()
+        + "\nSensores instalados:\n" + sensoresList.toString();
+  }
+
 }
