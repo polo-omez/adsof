@@ -16,17 +16,16 @@ public class pruebaSimulacionSensores {
     EstacionMeteorologica estacion = new EstacionMeteorologica("Estación Central", 40.4165, -3.7026);
 
     // 2. Creamos los sensores (usarán sus estrategias por defecto internamente)
-    SensorTemperatura tempSensor = new SensorTemperatura();
-    SensorHumedad humSensor = new SensorHumedad();
-    SensorPresionAtmosferica presSensor = new SensorPresionAtmosferica();
 
     // 4. Registramos los sensores en la estación
     try {
-      estacion.addSensor(tempSensor, LocalDate.of(2023, 9, 1));
-      estacion.addSensor(humSensor, LocalDate.of(2024, 9, 1));
-      estacion.addSensor(presSensor, LocalDate.of(2025, 11, 1));
+      estacion.crearSensor(SensorTemperatura.class, null);
+      estacion.crearSensor(SensorPresionAtmosferica.class, null);
+      estacion.crearSensor(SensorHumedad.class, null);
 
     } catch (SensorDuplicadoException e) {
+      System.err.println("Error al añadir sensores: " + e.getMessage());
+    } catch (Exception e) {
       System.err.println("Error al añadir sensores: " + e.getMessage());
     }
 
