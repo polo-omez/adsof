@@ -2,6 +2,7 @@
 package meteorologia.sensores;
 
 import meteorologia.estrategias.EstrategiaGeneracionEnRango;
+import meteorologia.estrategias.EstrategiaGeneracionSimilar;
 import meteorologia.estrategias.IEstrategia;
 
 public class SensorHumedad extends SensorMeteorologico {
@@ -13,7 +14,7 @@ public class SensorHumedad extends SensorMeteorologico {
   }
 
   public SensorHumedad() {
-    this(new EstrategiaGeneracionEnRango(rangoPorcentaje, 0.05));
+    this(new EstrategiaGeneracionSimilar(20, 40));
   }
 
   @Override

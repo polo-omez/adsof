@@ -1,6 +1,7 @@
 package meteorologia.sensores;
 
 import meteorologia.estrategias.EstrategiaGeneracionEnRango;
+import meteorologia.estrategias.EstrategiaGeneracionEnMedia;
 import meteorologia.estrategias.IEstrategia;
 
 public class SensorPresionAtmosferica extends SensorMeteorologico {
@@ -12,7 +13,7 @@ public class SensorPresionAtmosferica extends SensorMeteorologico {
   }
 
   public SensorPresionAtmosferica() {
-    this(new EstrategiaGeneracionEnRango(rangoHpascales, 0.05));
+    this(new EstrategiaGeneracionEnMedia(40, 500));
   }
 
   public void cambiarUnidad(UnidadPresion unidad) {

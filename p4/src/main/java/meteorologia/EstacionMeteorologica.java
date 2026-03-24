@@ -3,6 +3,8 @@ package meteorologia;
 import java.util.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import meteorologia.sensores.ISensor;
 import meteorologia.excepciones.*;
@@ -61,13 +63,20 @@ public class EstacionMeteorologica {
     return sensoresTipo;
   }
 
-  public void lanzarMedicion() {
+  public void lanzarMedicion(LocalDateTime fechaMedicion) {
     for (ISensor sensor : this.sensores.values()) {
-      sensor.medir();
+      sensor.medir(fechaMedicion);
     }
   }
 
   public void medicionPeriodica(double horasIntervalo, int lecturasMaximas) {
+    LocalDateTime fechaMedicion = LocalDateTime.now();
+
+    for (int i = 0; i < lecturasMaximas; i++) {
+      this.lanzarMedicion(fechaMedicion);
+      fechaMedicion = fechaMedicion.plusSeconds((int) (horasIntervalo * 3600));
+    }
+
     return;
   }
 

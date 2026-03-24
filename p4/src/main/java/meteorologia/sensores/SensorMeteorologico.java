@@ -82,9 +82,9 @@ public abstract class SensorMeteorologico implements ISensor {
   }
 
   @Override
-  public void medir() {
+  public void medir(LocalDateTime fechaMedicion) {
     ultimaLectura = this.estrategiaGeneracion.generarValor() - offsetCalibracion;
-    this.fechaUltimaLecutra = LocalDateTime.now();
+    this.fechaUltimaLecutra = fechaMedicion;
   }
 
   @Override

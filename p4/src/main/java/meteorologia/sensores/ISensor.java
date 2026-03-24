@@ -1,6 +1,7 @@
 package meteorologia.sensores;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public interface ISensor {
 
@@ -10,7 +11,7 @@ public interface ISensor {
 
   public void setFechaInstalacion(LocalDate fecha);
 
-  public void medir();
+  public void medir(LocalDateTime fechaMedicion);
 
   public void calibrar(double offset);
 

@@ -4,6 +4,7 @@ import meteorologia.sensores.*;
 import meteorologia.EstacionMeteorologica;
 import meteorologia.excepciones.SensorDuplicadoException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class pruebaSimulacionSensores {
@@ -30,9 +31,8 @@ public class pruebaSimulacionSensores {
     }
 
     // 5. Lanzamos una medición puntual fijando la fecha que pide el ejemplo
-    estacion.lanzarMedicion();
-    // *Nota: Asegúrate de que el método lanzarMedicion(fecha) pase esa fecha
-    // al sensor para que actualice su atributo 'fechaUltimaLectura'.
+    estacion.lanzarMedicion(LocalDateTime.now());
+    estacion.medicionPeriodica(0.5, 5);
 
     // 6. IMPRIMIMOS EL RESULTADO FINAL
     System.out.println("\n--- ESTADO ACTUAL DE LOS SENSORES ---");
