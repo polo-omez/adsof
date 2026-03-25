@@ -100,17 +100,18 @@ interface IConversor{
     class ConversorIdentidad {
     }
 
-    class ConversorCelsiusKelvin {
+    class ConversorTemperatura{
         - origen: UnidadTemperatura
         - destino: UnidadTemperatura
+        + factorCelsiusKelvin(origen:UnidadTemperatura, destino:UnidadTemperatura): double 
+        + factorKelfinFarenheit(origen:UnidadTemperatura, destino:UnidadTemperatura): double 
     }
     
-    class ConversorHpaPa {
+    class ConversorPresion {
         - origen: UnidadPresionAtmosferica
         - destino: UnidadPresionAtmosferica
-    }
-
-    class ConversorConcatenado {
+        + factor hPascalPascal(origen:UnidadPresion, destino:UnidadPresion): double 
+        + factorPascalMilibar(origen:UnidadPresion, destino:UnidadPresion): double 
     }
 
 }
@@ -178,9 +179,8 @@ IEstrategia <|.. EstrategiaGeneracionSimilar
 IEstrategia <|.. EstrategiaGeneracionEnMedia 
 
 IConversor <|.. ConversorIdentidad
-IConversor <|.. ConversorCelsiusKelvin 
-IConversor <|.. ConversorHpaPa 
-IConversor <|. ConversorConcatenado 
+IConversor <|.. ConversorTemperatura
+IConversor <|.. ConversorPresion 
 
 ' Herencia (Extension) --> Línea continua con flecha hueca
 SensorMeteorologico <|-- SensorTemperatura
@@ -194,8 +194,6 @@ EstacionMeteorologica *-- "1" Ubicacion : ubicacionGeografica
 SensorMeteorologico *--  ProcesadorDatos : "procesador"
 
 ProcesadorDatos *-- "*" Lectura: historial
-ConversorConcatenado o-- IConversor: conversorOrigen 
-ConversorConcatenado o-- IConversor: conversorDestino
 
 ' Asociaciones dirigidas
 SensorMeteorologico -->  Rango : rangoValores
