@@ -2,6 +2,7 @@ package meteorologia.sensores;
 
 import meteorologia.estrategias.EstrategiaGeneracionEnRango;
 import meteorologia.estrategias.IEstrategia;
+import meteorologia.procesamiento.ConversorTemperatura;
 
 /**
  * Clase que representa un sensor específico para medir la temperatura.
@@ -36,13 +37,15 @@ public class SensorTemperatura extends SensorMeteorologico {
     this(new EstrategiaGeneracionEnRango(rangoCelsius, 0.05));
   }
 
-  /**
-   * Modifica la unidad de medida utilizada para las lecturas.
-   *
-   * @param unidad La nueva unidad de temperatura a configurar.
-   */
-  public void cambiarUnidad(IUnidad unidad) {
-    this.setUnidadDeLectura(unidad);
+  @Override
+  public boolean cambiarConversor(IUnidad unidadDestino) {
+    if (!UnidadTemperatura.class.isInstance(unidadDestino)) {
+      return false;
+    }
+
+    ConversorTemperatura conversor = new ConversorTemperatura(this.getUnidadDeLectura(), unidadDestino);
+    this.getProcesadorDatos().setConversor();
+
   }
 
   /**

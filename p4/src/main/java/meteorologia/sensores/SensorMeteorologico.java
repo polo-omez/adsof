@@ -5,6 +5,8 @@ import java.time.temporal.ChronoUnit;
 import java.time.LocalDate;
 
 import meteorologia.estrategias.IEstrategia;
+import meteorologia.procesamiento.ConversorIdentidad;
+import meteorologia.procesamiento.ProcesadorDatos;
 
 /**
  * Clase abstracta que define la estructura y el comportamiento base de todo
@@ -35,6 +37,8 @@ public abstract class SensorMeteorologico implements ISensor {
   /** Motor que simula la generación de valores para las mediciones. */
   private IEstrategia estrategiaGeneracion;
 
+  private ProcesadorDatos procesadorDatos;
+
   /**
    * Constructor base para inicializar los atributos de un sensor.
    *
@@ -51,6 +55,7 @@ public abstract class SensorMeteorologico implements ISensor {
     this.rangoValores = rangoValores;
     this.unidadDeLectura = unidadDeLectura;
     this.estrategiaGeneracion = estrategiaGeneracion;
+    this.procesadorDatos = new ProcesadorDatos(new ConversorIdentidad(this.unidadDeLectura));
   }
 
   /**
@@ -87,6 +92,14 @@ public abstract class SensorMeteorologico implements ISensor {
    */
   public IUnidad getUnidadDeLectura() {
     return unidadDeLectura;
+  }
+
+  public boolean cambiarConversor(IUnidad unidadDestino) {
+    return false;
+  }
+
+  public ProcesadorDatos getProcesadorDatos() {
+    return procesadorDatos;
   }
 
   /**
