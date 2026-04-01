@@ -6,6 +6,7 @@ import java.time.LocalDate;
 
 import meteorologia.estrategias.IEstrategia;
 import meteorologia.procesamiento.ConversorIdentidad;
+import meteorologia.procesamiento.IConversor;
 import meteorologia.procesamiento.ProcesadorDatos;
 
 /**
@@ -94,8 +95,8 @@ public abstract class SensorMeteorologico implements ISensor {
     return unidadDeLectura;
   }
 
-  public boolean cambiarConversor(IUnidad unidadDestino) {
-    return false;
+  public boolean cambiarConversor(IConversor conversor) {
+    return this.procesadorDatos.cambiarConversor(conversor);
   }
 
   public ProcesadorDatos getProcesadorDatos() {

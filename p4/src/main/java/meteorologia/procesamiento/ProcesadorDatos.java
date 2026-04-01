@@ -19,4 +19,9 @@ public class ProcesadorDatos {
   public IConversor getConversor() {
     return this.conversor;
   }
+
+  public boolean cambiarConversor(IConversor conversor) {
+    this.conversor = conversor;
+    return true;
+  }
 }
