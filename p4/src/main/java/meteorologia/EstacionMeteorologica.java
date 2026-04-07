@@ -5,8 +5,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import meteorologia.sensores.ISensor;
+import meteorologia.sensores.IUnidad;
 import meteorologia.estrategias.IEstrategia;
 import meteorologia.sensores.SensorMeteorologico;
+import meteorologia.sensores.SensorTemperatura;
+import meteorologia.procesamiento.IConversor;
 import meteorologia.excepciones.*;
 
 /**
@@ -56,20 +59,19 @@ public class EstacionMeteorologica {
     return this.sensores;
   }
 
-  public void crearSensor(Class<? extends SensorMeteorologico> tipoSensor, IEstrategia estragiaSimulacion)
+  public void crearSensor(TipoSensor tipo, IEstrategia estrategiaGeneracion)
       throws SensorDuplicadoException {
-    try {
-      ISensor sensor;
-
-      if (estragiaSimulacion != null) {
-        sensor = tipoSensor.getDeclaredConstructor(IEstrategia.class).newInstance();
-      } else {
-        sensor = tipoSensor.getDeclaredConstructor().newInstance();
-      }
-      this.addSensor(sensor);
-    } catch (Exception e) {
-      throw new RuntimeException("Error al instanciar el sensor de tipo " + tipoSensor.getSimpleName(), e);
+    ISensor nuevoSensor;
+    nuevoSensor = tipo.crearSensor();
+    if (estrategiaGeneracion != null) {
+      nuevoSensor.setEstrategiaGeneracion(estrategiaGeneracion);
     }
+    this.addSensor(nuevoSensor);
+  }
+
+  public void asociarConversor(String sensorId, IUnidad unidadDestino)
+      throws SensorNoEncontradoException, SensorConversorIncompatiblesException {
+    return none;
 
   }
 

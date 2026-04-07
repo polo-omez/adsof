@@ -5,6 +5,8 @@ import java.time.temporal.ChronoUnit;
 import java.time.LocalDate;
 
 import meteorologia.estrategias.IEstrategia;
+import meteorologia.excepciones.ConversionNoCompatibleException;
+import meteorologia.excepciones.SensorConversorIncompatiblesException;
 import meteorologia.procesamiento.ConversorIdentidad;
 import meteorologia.procesamiento.IConversor;
 import meteorologia.procesamiento.ProcesadorDatos;
@@ -95,10 +97,6 @@ public abstract class SensorMeteorologico implements ISensor {
     return unidadDeLectura;
   }
 
-  public boolean cambiarConversor(IConversor conversor) {
-    return this.procesadorDatos.cambiarConversor(conversor);
-  }
-
   public ProcesadorDatos getProcesadorDatos() {
     return procesadorDatos;
   }
@@ -119,6 +117,11 @@ public abstract class SensorMeteorologico implements ISensor {
    */
   public void setUnidadDeLectura(IUnidad unidadDeLectura) {
     this.unidadDeLectura = unidadDeLectura;
+  }
+
+  @Override
+  public void setEstrategiaGeneracion(IEstrategia nuevaEstrategia) {
+    this.estrategiaGeneracion = nuevaEstrategia;
   }
 
   /**
@@ -161,6 +164,11 @@ public abstract class SensorMeteorologico implements ISensor {
   @Override
   public void setFechaInstalacion(LocalDate fecha) {
     this.fechaInstalacion = fecha;
+  }
+
+  @Override
+  public void cambiarConversor(IConversor conversor) throws ConversionNoCompatibleException {
+    this.procesadorDatos.setConversor(conversor);
   }
 
   /**

@@ -2,7 +2,9 @@ package meteorologia.sensores;
 
 import meteorologia.estrategias.EstrategiaGeneracionEnRango;
 import meteorologia.estrategias.IEstrategia;
+import meteorologia.excepciones.*;
 import meteorologia.procesamiento.IConversor;
+import meteorologia.procesamiento.ConversorConcatenado;
 import meteorologia.procesamiento.ConversorTemperatura;
 
 /**
@@ -38,13 +40,20 @@ public class SensorTemperatura extends SensorMeteorologico {
     this(new EstrategiaGeneracionEnRango(rangoCelsius, 0.05));
   }
 
-  public boolean cambiarConversor(IConversor conversor) {
-    if (!ConversorTemperatura.class.isInstance(conversor)
-        || conversor.getUnidadOrigen() != this.getUnidadDeLectura()) {
-      return false;
-    }
-    return super.cambiarConversor(conversor);
+  public void cambiarConversor(IUnidad unidadNueva) throws ConversionNoCompatibleException {
+    IUnidad unidadLectura = this.getUnidadDeLectura();
+    IConversor conversor;
+    if (!UnidadTemperatura.class.isInstance(unidadNueva)) {
+      throw new ConversionNoCompatibleException(unidadNueva, unidadLectura);
+    } else if (unidadLecutura.convertible(unidadNueva) == false) {
+      conversor = new ConversorConcatenado(unidadLectura, unidadNueva);
 
+    } else {
+      conversor = new ConversorTemperatura((UnidadTemperatura) unidadLectura,
+          (UnidadTemperatura) unidadNueva);
+    }
+
+    super.cambiarConversor(conversor);
   }
 
   /**

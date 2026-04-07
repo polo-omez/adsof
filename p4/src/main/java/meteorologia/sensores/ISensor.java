@@ -3,6 +3,10 @@ package meteorologia.sensores;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import meteorologia.estrategias.IEstrategia;
+import meteorologia.excepciones.*;
+import meteorologia.procesamiento.IConversor;
+
 /**
  * Interfaz que define el contrato básico que debe cumplir cualquier sensor
  * meteorológico.
@@ -54,4 +58,8 @@ public interface ISensor {
    * @return true si está calibrado, false si no lo está.
    */
   public boolean estaCalibrado();
+
+  public void setEstrategiaGeneracion(IEstrategia nuevaEstrategia);
+
+  public void cambiarConversor(IConversor conversor) throws ConversionNoCompatibleException;
 }

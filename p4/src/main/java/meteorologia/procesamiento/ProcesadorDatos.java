@@ -20,8 +20,7 @@ public class ProcesadorDatos {
     return this.conversor;
   }
 
-  public boolean cambiarConversor(IConversor conversor) {
+  public void setConversor(IConversor conversor) {
     this.conversor = conversor;
-    return true;
   }
 }
