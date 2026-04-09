@@ -2,10 +2,6 @@ package meteorologia.sensores;
 
 import meteorologia.estrategias.EstrategiaGeneracionEnRango;
 import meteorologia.estrategias.IEstrategia;
-import meteorologia.excepciones.*;
-import meteorologia.procesamiento.IConversor;
-import meteorologia.procesamiento.ConversorConcatenado;
-import meteorologia.procesamiento.ConversorTemperatura;
 
 /**
  * Clase que representa un sensor específico para medir la temperatura.
@@ -20,8 +16,6 @@ public class SensorTemperatura extends SensorMeteorologico {
    * Contador estático para generar identificadores únicos de forma secuencial.
    */
   private static int contador = 1;
-  /** Rango de valores operativos permitidos en grados Celsius. */
-  private static Rango rangoCelsius = new Rango(-273.15, 1000);
 
   /**
    * Construye un sensor de temperatura asignando una estrategia específica.
@@ -29,7 +23,7 @@ public class SensorTemperatura extends SensorMeteorologico {
    * @param estrategia La estrategia de simulación para generar lecturas.
    */
   public SensorTemperatura(IEstrategia estrategia) {
-    super(String.format("TEMP-%04d", contador++), UnidadTemperatura.CELSIUS, rangoCelsius, estrategia);
+    super(String.format("TEMP-%04d", contador++), UnidadTemperatura.CELSIUS, new Rango(-273.15, 1000), estrategia);
   }
 
   /**
@@ -37,23 +31,7 @@ public class SensorTemperatura extends SensorMeteorologico {
    * por defecto.
    */
   public SensorTemperatura() {
-    this(new EstrategiaGeneracionEnRango(rangoCelsius, 0.05));
-  }
-
-  public void cambiarConversor(IUnidad unidadNueva) throws ConversionNoCompatibleException {
-    IUnidad unidadLectura = this.getUnidadDeLectura();
-    IConversor conversor;
-    if (!UnidadTemperatura.class.isInstance(unidadNueva)) {
-      throw new ConversionNoCompatibleException(unidadNueva, unidadLectura);
-    } else if (unidadLecutura.convertible(unidadNueva) == false) {
-      conversor = new ConversorConcatenado(unidadLectura, unidadNueva);
-
-    } else {
-      conversor = new ConversorTemperatura((UnidadTemperatura) unidadLectura,
-          (UnidadTemperatura) unidadNueva);
-    }
-
-    super.cambiarConversor(conversor);
+    this(new EstrategiaGeneracionEnRango(new Rango(-10, 50), 0.05));
   }
 
   /**

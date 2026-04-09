@@ -17,8 +17,6 @@ public class SensorPresionAtmosferica extends SensorMeteorologico {
    * Contador estático para generar identificadores únicos de forma secuencial.
    */
   private static int contador = 1;
-  /** Rango de valores operativos permitidos en hectopascales. */
-  private static Rango rangoHpascales = new Rango(300, 1100);
 
   /**
    * Construye un sensor de presión asignando una estrategia específica.
@@ -26,7 +24,7 @@ public class SensorPresionAtmosferica extends SensorMeteorologico {
    * @param estrategia La estrategia de simulación para generar lecturas.
    */
   public SensorPresionAtmosferica(IEstrategia estrategia) {
-    super(String.format("PRES-%04d", contador++), UnidadPresion.HECTOPASCALES, rangoHpascales, estrategia);
+    super(String.format("PRES-%04d", contador++), UnidadPresion.HECTOPASCALES, new Rango(300, 1100), estrategia);
   }
 
   /**

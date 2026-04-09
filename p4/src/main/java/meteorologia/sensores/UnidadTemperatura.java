@@ -37,4 +37,5 @@ public enum UnidadTemperatura implements IUnidad {
   public String getSimbolo() {
     return this.simbolo;
   }
+
 }

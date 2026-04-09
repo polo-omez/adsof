@@ -7,7 +7,7 @@ public class ConversionNoCompatibleException extends Exception {
   private IUnidad unidadDestino;
 
   public ConversionNoCompatibleException(IUnidad origen, IUnidad destino) {
-    super("Error: conversion directa entre" + origen.getSimbolo() + " y " + destino.getSimbolo() + "no compatible");
+    super("Error: conversion directa entre " + origen.getSimbolo() + " y " + destino.getSimbolo() + " no compatible");
     this.unidadOrigen = origen;
     this.unidadDestino = destino;
   }

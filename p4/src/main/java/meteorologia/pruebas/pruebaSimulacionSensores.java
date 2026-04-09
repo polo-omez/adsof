@@ -2,7 +2,10 @@ package meteorologia.pruebas;
 
 import meteorologia.sensores.*;
 import meteorologia.EstacionMeteorologica;
-import meteorologia.excepciones.SensorDuplicadoException;
+import meteorologia.TipoSensor;
+import meteorologia.excepciones.*;
+import meteorologia.procesamiento.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,9 +22,18 @@ public class pruebaSimulacionSensores {
 
     // 4. Registramos los sensores en la estación
     try {
-      estacion.crearSensor(SensorTemperatura.class, null);
-      estacion.crearSensor(SensorPresionAtmosferica.class, null);
-      estacion.crearSensor(SensorHumedad.class, null);
+      String sensor1 = estacion.crearSensor(TipoSensor.TEMPERATURA, null);
+      estacion.asociarConversor(sensor1,
+          new ConversorTemperatura((UnidadTemperatura) estacion.getSensor(sensor1).getUnidadDeLectura(),
+              UnidadTemperatura.KELVIN));
+      estacion.crearSensor(TipoSensor.TEMPERATURA, null);
+
+      String sensor3 = estacion.crearSensor(TipoSensor.PRESION_ATMOSFERICA, null);
+      estacion.asociarConversor(sensor3,
+          new ConversorPresion((UnidadPresion) estacion.getSensor(sensor3).getUnidadDeLectura(),
+              UnidadPresion.PASCALES));
+      estacion.crearSensor(TipoSensor.PRESION_ATMOSFERICA, null);
+      estacion.crearSensor(TipoSensor.HUMEDAD, null);
 
     } catch (SensorDuplicadoException e) {
       System.err.println("Error al añadir sensores: " + e.getMessage());
@@ -29,9 +41,13 @@ public class pruebaSimulacionSensores {
       System.err.println("Error al añadir sensores: " + e.getMessage());
     }
 
-    // 5. Lanzamos una medición puntual fijando la fecha que pide el ejemplo
-    estacion.lanzarMedicion(LocalDateTime.now());
-    estacion.medicionPeriodica(0.5, 5);
+    // 5. Lanzamos las mediciones
+    try {
+      estacion.lanzarMedicion(LocalDateTime.now());
+      estacion.medicionPeriodica(0.5, 3);
+    } catch (ConversionNoCompatibleException e) {
+      System.err.println("Error al lanzar mediciones: " + e.getMessage());
+    }
 
     // 6. IMPRIMIMOS EL RESULTADO FINAL
     System.out.println("\n--- ESTADO ACTUAL DE LOS SENSORES ---");

@@ -15,4 +15,5 @@ public interface IUnidad {
    * @return La cadena de texto con el símbolo de la unidad.
    */
   public String getSimbolo();
+
 }

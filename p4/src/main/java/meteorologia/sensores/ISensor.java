@@ -31,6 +31,8 @@ public interface ISensor {
    */
   public LocalDate getFechaInstalacion();
 
+  public IUnidad getUnidadDeLectura();
+
   /**
    * Asigna la fecha de instalación al sensor.
    *
@@ -43,7 +45,7 @@ public interface ISensor {
    *
    * @param fechaMedicion Fecha y hora de la lectura.
    */
-  public void medir(LocalDateTime fechaMedicion);
+  public void medir(LocalDateTime fechaMedicion) throws ConversionNoCompatibleException;
 
   /**
    * Aplica un valor de corrección al sensor.

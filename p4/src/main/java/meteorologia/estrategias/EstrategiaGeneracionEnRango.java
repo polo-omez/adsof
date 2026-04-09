@@ -6,9 +6,11 @@ import java.util.Random;
 public class EstrategiaGeneracionEnRango implements IEstrategia {
   private Rango rango;
   private double probabilidadDesborde;
+  private Random rand;
 
   public EstrategiaGeneracionEnRango(Rango rango, double probabilidadDesborde) {
     this.rango = rango;
+    this.rand = new Random();
 
     if (probabilidadDesborde > 1)
       this.probabilidadDesborde = 1;
@@ -23,15 +25,18 @@ public class EstrategiaGeneracionEnRango implements IEstrategia {
 
   @Override
   public double generarValor() {
-    Random rand = new Random();
     double min = this.rango.getValorMinimo();
     double max = this.rango.getValorMaximo();
 
     if (rand.nextDouble() < this.probabilidadDesborde) {
-      return rand.nextDouble(max - min + 1) + min + max + 1;
+      if (rand.nextBoolean()) {
+        return max + 1.0 + (rand.nextDouble() * 10);
+      } else {
+        return min - 1.0 - (rand.nextDouble() * 10);
+      }
     }
 
-    return rand.nextDouble(max - min + 1) + min;
+    return min + (max - min) * rand.nextDouble();
 
   }
 }

@@ -2,6 +2,7 @@ package meteorologia;
 
 import java.util.*;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.time.LocalDateTime;
 
 import meteorologia.sensores.ISensor;
@@ -28,6 +29,8 @@ public class EstacionMeteorologica {
   /** Mapa de sensores registrados en la estación indexados por su ID. */
   private Map<String, ISensor> sensores;
 
+  private LocalDateTime ultimaLectura;
+
   /**
    * Construye una nueva estación meteorológica con su ubicación.
    *
@@ -38,7 +41,8 @@ public class EstacionMeteorologica {
   public EstacionMeteorologica(String nombre, double latitud, double longitud) {
     this.nombre = nombre;
     this.ubicacionGeografica = new Ubicacion(latitud, longitud);
-    this.sensores = new HashMap<>();
+    this.sensores = new LinkedHashMap<>();
+    this.ultimaLectura = LocalDateTime.now();
   }
 
   /**
@@ -59,7 +63,7 @@ public class EstacionMeteorologica {
     return this.sensores;
   }
 
-  public void crearSensor(TipoSensor tipo, IEstrategia estrategiaGeneracion)
+  public String crearSensor(TipoSensor tipo, IEstrategia estrategiaGeneracion)
       throws SensorDuplicadoException {
     ISensor nuevoSensor;
     nuevoSensor = tipo.crearSensor();
@@ -67,11 +71,12 @@ public class EstacionMeteorologica {
       nuevoSensor.setEstrategiaGeneracion(estrategiaGeneracion);
     }
     this.addSensor(nuevoSensor);
+    return nuevoSensor.getIdentificador();
   }
 
-  public void asociarConversor(String sensorId, IUnidad unidadDestino)
-      throws SensorNoEncontradoException, SensorConversorIncompatiblesException {
-    return none;
+  public void asociarConversor(String sensorId, IConversor nuevoConversor)
+      throws SensorNoEncontradoException, ConversionNoCompatibleException {
+    this.getSensor(sensorId).cambiarConversor(nuevoConversor);
 
   }
 
@@ -143,10 +148,12 @@ public class EstacionMeteorologica {
    *
    * @param fechaMedicion La fecha y hora exacta de la medición.
    */
-  public void lanzarMedicion(LocalDateTime fechaMedicion) {
+  public void lanzarMedicion(LocalDateTime fechaMedicion) throws ConversionNoCompatibleException {
     for (ISensor sensor : this.sensores.values()) {
       sensor.medir(fechaMedicion);
     }
+
+    this.ultimaLectura = fechaMedicion;
   }
 
   /**
@@ -155,7 +162,7 @@ public class EstacionMeteorologica {
    * @param horasIntervalo  Las horas de separación entre cada medición simulada.
    * @param lecturasMaximas El número total de mediciones que se realizarán.
    */
-  public void medicionPeriodica(double horasIntervalo, int lecturasMaximas) {
+  public void medicionPeriodica(double horasIntervalo, int lecturasMaximas) throws ConversionNoCompatibleException {
     LocalDateTime fechaMedicion = LocalDateTime.now();
 
     for (int i = 0; i < lecturasMaximas; i++) {
@@ -172,13 +179,13 @@ public class EstacionMeteorologica {
    */
   @Override
   public String toString() {
-    StringJoiner sensoresList = new StringJoiner(",\n", "[", "]");
+    String sensoresList = "";
     for (ISensor sensor : this.sensores.values()) {
-      sensoresList
-          .add(sensor.getIdentificador() + " (desde: " + sensor.getFechaInstalacion() + ") " + sensor.toString());
+      sensoresList += "\n" + sensor;
     }
 
     return "Estacion Meteorologica: " + this.nombre + "\nUbicacion: " + this.ubicacionGeografica.toString()
-        + "\nSensores instalados:\n" + sensoresList.toString();
+        + "\nSensores instalados: " + this.sensores.size() + " \nÚltima lectura: "
+        + this.ultimaLectura.truncatedTo(ChronoUnit.SECONDS) + sensoresList;
   }
 }

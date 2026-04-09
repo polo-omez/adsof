@@ -1,12 +1,10 @@
 package meteorologia.sensores;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.time.LocalDate;
 
 import meteorologia.estrategias.IEstrategia;
 import meteorologia.excepciones.ConversionNoCompatibleException;
-import meteorologia.excepciones.SensorConversorIncompatiblesException;
 import meteorologia.procesamiento.ConversorIdentidad;
 import meteorologia.procesamiento.IConversor;
 import meteorologia.procesamiento.ProcesadorDatos;
@@ -88,15 +86,6 @@ public abstract class SensorMeteorologico implements ISensor {
     return fechaUltimaLecutra;
   }
 
-  /**
-   * Obtiene la unidad de medida actual del sensor.
-   *
-   * @return Objeto que representa la unidad configurada.
-   */
-  public IUnidad getUnidadDeLectura() {
-    return unidadDeLectura;
-  }
-
   public ProcesadorDatos getProcesadorDatos() {
     return procesadorDatos;
   }
@@ -144,6 +133,16 @@ public abstract class SensorMeteorologico implements ISensor {
     return fechaInstalacion;
   }
 
+  @Override
+  /**
+   * Obtiene la unidad de medida actual del sensor.
+   *
+   * @return Objeto que representa la unidad configurada.
+   */
+  public IUnidad getUnidadDeLectura() {
+    return unidadDeLectura;
+  }
+
   /**
    * Ajusta el sensor definiendo un nuevo offset y actualizando la fecha de
    * calibración.
@@ -167,8 +166,12 @@ public abstract class SensorMeteorologico implements ISensor {
   }
 
   @Override
-  public void cambiarConversor(IConversor conversor) throws ConversionNoCompatibleException {
-    this.procesadorDatos.setConversor(conversor);
+  public void cambiarConversor(IConversor nuevoConversor) throws ConversionNoCompatibleException {
+    IUnidad unidadLectura = this.getUnidadDeLectura();
+    if (nuevoConversor.getUnidadOrigen() != unidadLectura) {
+      throw new ConversionNoCompatibleException(unidadLectura, nuevoConversor.getUnidadDestino());
+    }
+    this.procesadorDatos.setConversor(nuevoConversor);
   }
 
   /**
@@ -181,7 +184,7 @@ public abstract class SensorMeteorologico implements ISensor {
   @Override
   public boolean estaCalibrado() {
     if (rangoValores.enRango(this.ultimaLectura))
-      return LocalDate.now().isBefore(this.fechaUltimaCalibracion);
+      return LocalDate.now().minusYears(1).isBefore(this.fechaUltimaCalibracion);
 
     return false;
   }
@@ -194,9 +197,12 @@ public abstract class SensorMeteorologico implements ISensor {
    *                      medición.
    */
   @Override
-  public void medir(LocalDateTime fechaMedicion) {
+  public void medir(LocalDateTime fechaMedicion) throws ConversionNoCompatibleException {
     ultimaLectura = this.estrategiaGeneracion.generarValor() - offsetCalibracion;
     this.fechaUltimaLecutra = fechaMedicion;
+
+    double valorConvertido = this.procesadorDatos.getConversor().convertir(ultimaLectura);
+    this.procesadorDatos.addLectura(valorConvertido, fechaMedicion);
   }
 
   /**
@@ -206,7 +212,12 @@ public abstract class SensorMeteorologico implements ISensor {
    */
   @Override
   public String toString() {
-    return String.format("(%.1f%s) última lectura: %s", this.ultimaLectura, this.unidadDeLectura.getSimbolo(),
-        this.fechaUltimaLecutra.truncatedTo(ChronoUnit.SECONDS));
+    String string = this.getIdentificador() + " (" + this.unidadDeLectura.getSimbolo() + ")";
+    IUnidad destinoConversor = this.procesadorDatos.getConversor().getUnidadDestino();
+    if (destinoConversor != this.unidadDeLectura) {
+      string += " con conversor a " + destinoConversor.getSimbolo();
+    }
+    string += ": " + this.procesadorDatos;
+    return string;
   }
 }

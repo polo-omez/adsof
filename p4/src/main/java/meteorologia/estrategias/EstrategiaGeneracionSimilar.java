@@ -5,8 +5,10 @@ import java.util.Random;
 public class EstrategiaGeneracionSimilar implements IEstrategia {
   private double probDesviacion;
   private double ultimoValor;
+  private Random rand;
 
   public EstrategiaGeneracionSimilar(double porcentajeDesviacion, double valorInicial) {
+    this.rand = new Random();
     if (porcentajeDesviacion > 100)
       this.probDesviacion = 1;
 
@@ -22,11 +24,12 @@ public class EstrategiaGeneracionSimilar implements IEstrategia {
 
   @Override
   public double generarValor() {
-    Random rand = new Random();
     double min = ultimoValor - ultimoValor * this.probDesviacion;
     double max = ultimoValor + ultimoValor * this.probDesviacion;
 
-    return rand.nextDouble(max - min + 1) + min;
+    double nuevoValor = rand.nextDouble(max - min + 1) + min;
+    this.ultimoValor = nuevoValor;
+    return nuevoValor;
 
   }
 }

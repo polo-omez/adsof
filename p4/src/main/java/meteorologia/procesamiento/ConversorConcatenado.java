@@ -7,7 +7,7 @@ public class ConversorConcatenado implements IConversor {
   private IConversor conversorOrigen;
   private IConversor conversorDestino;
 
-  public ConversorConcatenado(IUnidad origen, IUnidad destino) throws ConversionNoCompatibleException {
+  public ConversorConcatenado(IConversor origen, IConversor destino) throws ConversionNoCompatibleException {
     if (origen.getUnidadDestino() != destino.getUnidadOrigen()) {
       throw new ConversionNoCompatibleException(origen.getUnidadOrigen(), destino.getUnidadDestino());
     }
