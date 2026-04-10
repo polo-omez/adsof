@@ -13,6 +13,7 @@ import meteorologia.sensores.SensorMeteorologico;
 import meteorologia.sensores.SensorTemperatura;
 import meteorologia.procesamiento.IConversor;
 import meteorologia.excepciones.*;
+import meteorologia.formato.IDocumento;
 
 /**
  * Clase que representa y coordina una estación meteorológica y sus sensores.
@@ -22,7 +23,7 @@ import meteorologia.excepciones.*;
  * @version 1.0
  *          Nombre del fichero: EstacionMeteorologica.java
  */
-public class EstacionMeteorologica {
+public class EstacionMeteorologica implements IDocumento {
   /** Nombre identificativo de la estación. */
   private String nombre;
   /** Coordenadas geográficas donde se sitúa la estación. */
@@ -232,5 +233,46 @@ public class EstacionMeteorologica {
     }
 
     return salida.toString();
+  }
+
+  @Override
+  public String getTituloDocumento() {
+    return this.nombre;
+  }
+
+  @Override
+  public String getSeccionPricipalDocumento() {
+    return this.nombre;
+  }
+
+  @Override
+  public List<String> getParrafosDocumento() {
+    return List.of(
+        "Ubicación: " + this.ubicacionGeografica,
+        "Sensores instalados: " + this.sensores.size(),
+        "Última lectura: : " + this.ultimaLectura.truncatedTo(ChronoUnit.SECONDS));
+  }
+
+  @Override
+  public Map<String, List<String>> getColeccionesDocumento() {
+    Map<String, List<String>> colecciones = new LinkedHashMap<>();
+    List<String> listaSensores = new ArrayList<>();
+
+    for (ISensor sensor : this.sensores.values()) {
+      listaSensores.add(sensor.toString());
+    }
+
+    colecciones.put("Sensores Activos", listaSensores);
+
+    if (!this.historialAlertas.isEmpty()) {
+      List<String> listaAlertas = new ArrayList<>();
+      for (RegistroAlerta alerta : this.historialAlertas) {
+        listaAlertas.add(alerta.toString());
+      }
+      colecciones.put("Alertas activas", listaAlertas);
+    }
+
+    return colecciones;
+
   }
 }
