@@ -37,13 +37,4 @@ public class SensorHumedad extends SensorMeteorologico {
     this(new EstrategiaGeneracionSimilar(20, 40));
   }
 
-  /**
-   * Devuelve una representación en cadena del sensor de humedad.
-   *
-   * @return Cadena indicando el tipo de sensor y sus datos comunes.
-   */
-  @Override
-  public String toString() {
-    return "Sensor Humedad " + super.toString();
-  }
 }

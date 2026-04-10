@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import meteorologia.estrategias.IEstrategia;
 import meteorologia.excepciones.*;
+import meteorologia.alertas.*;
 import meteorologia.procesamiento.IConversor;
 
 /**
@@ -45,7 +46,7 @@ public interface ISensor {
    *
    * @param fechaMedicion Fecha y hora de la lectura.
    */
-  public void medir(LocalDateTime fechaMedicion) throws ConversionNoCompatibleException;
+  public void medir(LocalDateTime fechaMedicion) throws AlertaMeteorologicaException, ConversionNoCompatibleException;
 
   /**
    * Aplica un valor de corrección al sensor.
@@ -53,6 +54,8 @@ public interface ISensor {
    * @param offset Valor numérico a ajustar.
    */
   public void calibrar(double offset);
+
+  public void calibrar(double offset, int diasDuracion);
 
   /**
    * Comprueba el estado operativo del sensor.
@@ -64,4 +67,6 @@ public interface ISensor {
   public void setEstrategiaGeneracion(IEstrategia nuevaEstrategia);
 
   public void cambiarConversor(IConversor conversor) throws ConversionNoCompatibleException;
+
+  public void setUmbralCambioBrusco(double porcentaje);
 }

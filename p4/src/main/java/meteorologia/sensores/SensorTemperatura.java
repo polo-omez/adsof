@@ -33,15 +33,4 @@ public class SensorTemperatura extends SensorMeteorologico {
   public SensorTemperatura() {
     this(new EstrategiaGeneracionEnRango(new Rango(-10, 50), 0.05));
   }
-
-  /**
-   * Devuelve una representación en cadena del sensor de temperatura.
-   *
-   * @return Cadena con el formato específico indicando el tipo de sensor y sus
-   *         datos.
-   */
-  @Override
-  public String toString() {
-    return "Sensor Temperatura " + super.toString();
-  }
 }

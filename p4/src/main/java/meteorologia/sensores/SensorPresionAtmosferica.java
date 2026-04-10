@@ -43,14 +43,4 @@ public class SensorPresionAtmosferica extends SensorMeteorologico {
   public void cambiarUnidad(UnidadPresion unidad) {
     this.setUnidadDeLectura(unidad);
   }
-
-  /**
-   * Devuelve una representación en cadena del sensor de presión atmosférica.
-   *
-   * @return Cadena indicando el tipo de sensor y sus datos comunes.
-   */
-  @Override
-  public String toString() {
-    return "Sensor Presión " + super.toString();
-  }
 }

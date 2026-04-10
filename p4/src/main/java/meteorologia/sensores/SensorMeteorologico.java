@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 import meteorologia.estrategias.IEstrategia;
 import meteorologia.excepciones.ConversionNoCompatibleException;
+import meteorologia.alertas.*;
 import meteorologia.procesamiento.ConversorIdentidad;
 import meteorologia.procesamiento.IConversor;
 import meteorologia.procesamiento.ProcesadorDatos;
@@ -39,6 +40,9 @@ public abstract class SensorMeteorologico implements ISensor {
   private IEstrategia estrategiaGeneracion;
 
   private ProcesadorDatos procesadorDatos;
+  private int diasDuracionCalibracion;
+  private double umbralCambioBrusco;
+  private boolean operativo;
 
   /**
    * Constructor base para inicializar los atributos de un sensor.
@@ -57,6 +61,9 @@ public abstract class SensorMeteorologico implements ISensor {
     this.unidadDeLectura = unidadDeLectura;
     this.estrategiaGeneracion = estrategiaGeneracion;
     this.procesadorDatos = new ProcesadorDatos(new ConversorIdentidad(this.unidadDeLectura));
+    this.diasDuracionCalibracion = 365;
+    this.umbralCambioBrusco = 0.50; // 50% por defecto
+    this.operativo = true; // El sensor nace funcionando
   }
 
   /**
@@ -113,6 +120,11 @@ public abstract class SensorMeteorologico implements ISensor {
     this.estrategiaGeneracion = nuevaEstrategia;
   }
 
+  @Override
+  public void setUmbralCambioBrusco(double porcentaje) {
+    this.umbralCambioBrusco = porcentaje;
+  }
+
   /**
    * Obtiene el identificador único del sensor.
    *
@@ -143,16 +155,17 @@ public abstract class SensorMeteorologico implements ISensor {
     return unidadDeLectura;
   }
 
-  /**
-   * Ajusta el sensor definiendo un nuevo offset y actualizando la fecha de
-   * calibración.
-   *
-   * @param offset El valor de corrección a aplicar.
-   */
   @Override
   public void calibrar(double offset) {
+    this.calibrar(offset, 365); // 365 días por defecto
+  }
+
+  @Override
+  public void calibrar(double offset, int diasDuracion) {
     this.offsetCalibracion = offset;
+    this.diasDuracionCalibracion = diasDuracion;
     this.fechaUltimaCalibracion = LocalDate.now();
+    this.operativo = true; // "En los casos en que la toma estaba detenida, deberá retomarse"
   }
 
   /**
@@ -183,10 +196,13 @@ public abstract class SensorMeteorologico implements ISensor {
    */
   @Override
   public boolean estaCalibrado() {
-    if (rangoValores.enRango(this.ultimaLectura))
-      return LocalDate.now().minusYears(1).isBefore(this.fechaUltimaCalibracion);
-
-    return false;
+    LocalDate fechaCaducidad = this.fechaUltimaCalibracion.plusDays(this.diasDuracionCalibracion);
+    // Si HOY es posterior o igual a la fecha de caducidad, ya no está calibrado
+    if (LocalDate.now().isAfter(fechaCaducidad) || LocalDate.now().isEqual(fechaCaducidad)) {
+      this.operativo = false; // Se detiene por seguridad
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -197,12 +213,50 @@ public abstract class SensorMeteorologico implements ISensor {
    *                      medición.
    */
   @Override
-  public void medir(LocalDateTime fechaMedicion) throws ConversionNoCompatibleException {
-    ultimaLectura = this.estrategiaGeneracion.generarValor() - offsetCalibracion;
+  public void medir(LocalDateTime fechaMedicion) throws AlertaMeteorologicaException {
+
+    // 1. Validar operatividad y calibración ANTES de hacer nada
+    if (!this.operativo || !this.estaCalibrado()) {
+      this.operativo = false;
+      LocalDate fechaCaducidad = this.fechaUltimaCalibracion.plusDays(this.diasDuracionCalibracion);
+      throw new CalibracionCaducadaException(this, fechaCaducidad);
+    }
+
+    // 2. Generar el valor
+    double valorAnterior = this.ultimaLectura;
+    double valorGenerado = this.estrategiaGeneracion.generarValor() - this.offsetCalibracion;
+
+    // 3. Validar Rango (Fallo Fatal)
+    if (!this.rangoValores.enRango(valorGenerado)) {
+      this.operativo = false; // "Evitar medir en sensores fuera de rango"
+      throw new LecturaFueraDeRangoException(this, valorGenerado);
+    }
+
+    // 4. Calcular Cambio Brusco (Warning)
+    boolean hayCambioBrusco = false;
+    // Evitamos división por cero al calcular el porcentaje
+    if (Math.abs(valorAnterior) > 0.0001) {
+      double diferenciaPorcentual = Math.abs(valorGenerado - valorAnterior) / Math.abs(valorAnterior);
+      if (diferenciaPorcentual > this.umbralCambioBrusco) {
+        hayCambioBrusco = true;
+      }
+    }
+
+    // 5. Consolidar el dato (Llegamos aquí porque no hubo fallos fatales)
+    this.ultimaLectura = valorGenerado;
     this.fechaUltimaLecutra = fechaMedicion;
 
-    double valorConvertido = this.procesadorDatos.getConversor().convertir(ultimaLectura);
-    this.procesadorDatos.addLectura(valorConvertido, fechaMedicion);
+    try {
+      double valorConvertido = this.procesadorDatos.getConversor().convertir(this.ultimaLectura);
+      this.procesadorDatos.addLectura(valorConvertido, fechaMedicion);
+    } catch (ConversionNoCompatibleException e) {
+      System.err.println("Error de conversión en sensor " + this.id + ": " + e.getMessage());
+    }
+
+    // 6. Lanzar la alerta (si aplica) DESPUÉS de guardar el dato válido
+    if (hayCambioBrusco) {
+      throw new CambioBruscoException(this, valorAnterior, valorGenerado);
+    }
   }
 
   /**

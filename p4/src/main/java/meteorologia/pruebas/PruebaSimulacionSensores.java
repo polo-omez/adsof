@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-public class pruebaSimulacionSensores {
+public class PruebaSimulacionSensores {
 
   public static void main(String[] args) {
     System.out.println("--- INICIANDO SIMULACIÓN DE LA ESTACIÓN METEOROLÓGICA ---");

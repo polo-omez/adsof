@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 import meteorologia.sensores.ISensor;
 import meteorologia.sensores.IUnidad;
+import meteorologia.alertas.*;
 import meteorologia.estrategias.IEstrategia;
 import meteorologia.sensores.SensorMeteorologico;
 import meteorologia.sensores.SensorTemperatura;
@@ -29,6 +30,8 @@ public class EstacionMeteorologica {
   /** Mapa de sensores registrados en la estación indexados por su ID. */
   private Map<String, ISensor> sensores;
 
+  private List<RegistroAlerta> historialAlertas;
+
   private LocalDateTime ultimaLectura;
 
   /**
@@ -43,6 +46,7 @@ public class EstacionMeteorologica {
     this.ubicacionGeografica = new Ubicacion(latitud, longitud);
     this.sensores = new LinkedHashMap<>();
     this.ultimaLectura = LocalDateTime.now();
+    this.historialAlertas = new ArrayList<>(); // Inicializar historial
   }
 
   /**
@@ -143,6 +147,22 @@ public class EstacionMeteorologica {
     return sensoresTipo;
   }
 
+  public void calibrarSensor(String sensorId, double offset, int diasDuracion) throws SensorNoEncontradoException {
+    ISensor sensor = this.getSensor(sensorId);
+
+    // 1. Calibrar físicamente el sensor (lo reactiva por dentro)
+    sensor.calibrar(offset, diasDuracion);
+
+    // 2. Eliminar todas las alertas previas asociadas a su ID
+    // removeIf es la forma más limpia y moderna en Java de borrar filtrando
+    this.historialAlertas.removeIf(alerta -> alerta.getSensorInvolucrado().getIdentificador().equals(sensorId));
+  }
+
+  // Sobrecarga por comodidad
+  public void calibrarSensor(String sensorId, double offset) throws SensorNoEncontradoException {
+    this.calibrarSensor(sensorId, offset, 365);
+  }
+
   /**
    * Obliga a todos los sensores registrados a realizar una medición puntual.
    *
@@ -150,10 +170,23 @@ public class EstacionMeteorologica {
    */
   public void lanzarMedicion(LocalDateTime fechaMedicion) throws ConversionNoCompatibleException {
     for (ISensor sensor : this.sensores.values()) {
-      sensor.medir(fechaMedicion);
-    }
+      try {
+        // Intentamos ejecutar la medición normal
+        sensor.medir(fechaMedicion);
 
-    this.ultimaLectura = fechaMedicion;
+      } catch (SensorSinCalibrarException e) {
+        // Captura Fallo Fatal (Caducado o Fuera de Rango). El sensor YA se ha detenido.
+        this.historialAlertas.add(new RegistroAlerta(fechaMedicion, e));
+
+      } catch (CambioBruscoException e) {
+        // Captura Warning. El sensor GUARDÓ el dato, pero anotamos el susto.
+        this.historialAlertas.add(new RegistroAlerta(fechaMedicion, e));
+
+      } catch (AlertaMeteorologicaException e) {
+        // Un "Catch-All" por si en el futuro inventamos más tipos de alertas
+        this.historialAlertas.add(new RegistroAlerta(fechaMedicion, e));
+      }
+    }
   }
 
   /**
@@ -179,13 +212,25 @@ public class EstacionMeteorologica {
    */
   @Override
   public String toString() {
-    String sensoresList = "";
+    // Formateo de los sensores
+    StringBuilder salida = new StringBuilder();
+    salida.append("Estación Meteorológica: ").append(this.nombre).append("\n");
+    salida.append("Ubicación: ").append(this.ubicacionGeografica.toString()).append("\n");
+    salida.append("Sensores instalados: ").append(this.sensores.size()).append("\n");
+    // (Podrías añadir la fecha global de última lectura aquí si la tuvieras)
+
     for (ISensor sensor : this.sensores.values()) {
-      sensoresList += "\n" + sensor;
+      salida.append(sensor + "\n");
     }
 
-    return "Estacion Meteorologica: " + this.nombre + "\nUbicacion: " + this.ubicacionGeografica.toString()
-        + "\nSensores instalados: " + this.sensores.size() + " \nÚltima lectura: "
-        + this.ultimaLectura.truncatedTo(ChronoUnit.SECONDS) + sensoresList;
+    // Formateo del panel de alertas
+    if (!this.historialAlertas.isEmpty()) {
+      salida.append("\nAlertas activas: ").append(this.historialAlertas.size()).append("\n");
+      for (RegistroAlerta alerta : this.historialAlertas) {
+        salida.append(alerta.toString()).append("\n");
+      }
+    }
+
+    return salida.toString();
   }
 }
