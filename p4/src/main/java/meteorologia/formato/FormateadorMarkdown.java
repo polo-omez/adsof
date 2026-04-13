@@ -3,6 +3,14 @@ package meteorologia.formato;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Clase encargada de formatear documentos a lenguaje Markdown.
+ *
+ * @author Pablo Gómez
+ * @author Jose Antonio Gómez
+ * @version 1.0
+ *          Nombre del fichero: FormateadorMarkdown.java
+ */
 public class FormateadorMarkdown implements IFormateador {
 
   @Override

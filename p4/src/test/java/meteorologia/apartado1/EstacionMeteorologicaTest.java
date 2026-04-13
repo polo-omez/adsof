@@ -10,16 +10,36 @@ import meteorologia.EstacionMeteorologica;
 import meteorologia.sensores.*;
 import meteorologia.excepciones.*;
 
+/**
+ * Clase de pruebas unitarias para validar el comportamiento básico de la
+ * Estación Meteorológica y la gestión de sus sensores.
+ *
+ * @author Pablo Gómez
+ * @author Jose Antonio Gómez
+ * @version 1.0
+ *          Nombre del fichero: EstacionMeteorologicaTest.java
+ */
 public class EstacionMeteorologicaTest {
 
   private EstacionMeteorologica estacion;
 
+  /**
+   * Configuración inicial antes de cada test. Inicializa una estación base.
+   */
   @BeforeEach
   void setUp() {
     estacion = new EstacionMeteorologica("Estación Central Madrid", 40.41, -3.70);
   }
 
-  // TEST 1: Comprobar que se añade un sensor y se puede recuperar
+  /**
+   * Verifica que es posible añadir un sensor a la estación y posteriormente
+   * recuperarlo correctamente utilizando su identificador.
+   *
+   * @throws SensorDuplicadoException    Si ocurre un error de duplicidad
+   *                                     inesperado.
+   * @throws SensorNoEncontradoException Si el sensor no se encuentra al intentar
+   *                                     recuperarlo.
+   */
   @Test
   void testAñadirYRecuperarSensor() throws SensorDuplicadoException, SensorNoEncontradoException {
     SensorTemperatura t1 = new SensorTemperatura();
@@ -31,7 +51,10 @@ public class EstacionMeteorologicaTest {
     assertEquals(t1, recuperado, "El sensor recuperado debe ser exactamente el mismo objeto");
   }
 
-  // TEST 2: Comprobar la Excepción de Sensor Duplicado
+  /**
+   * Verifica que el sistema lanza correctamente la excepción correspondiente
+   * cuando se intenta añadir un sensor que ya existe en la estación.
+   */
   @Test
   void testLanzaExcepcionSiSensorDuplicado() {
     SensorTemperatura t1 = new SensorTemperatura();
@@ -42,37 +65,41 @@ public class EstacionMeteorologicaTest {
     }, "Debe lanzar SensorDuplicadoException");
   }
 
-  // TEST 3: Comprobar el filtrado de sensores por tipo
+  /**
+   * Verifica que el método de filtrado devuelve las colecciones correctas
+   * según el tipo de clase solicitada.
+   *
+   * @throws SensorDuplicadoException Si ocurre un error al registrar los sensores
+   *                                  de prueba.
+   */
   @Test
   void testObtenerSensoresPorTipo() throws SensorDuplicadoException {
-    // Añadimos 2 de temperatura y 1 de humedad
     estacion.addSensor(new SensorTemperatura());
     estacion.addSensor(new SensorTemperatura());
     estacion.addSensor(new SensorHumedad());
 
-    // Le pedimos a la estación solo los de temperatura
     List<ISensor> listaTemperaturas = estacion.getSensores(SensorTemperatura.class);
     List<ISensor> listaHumedad = estacion.getSensores(SensorHumedad.class);
 
-    // Verificamos que los tamaños de las listas son correctos
     assertEquals(2, listaTemperaturas.size(), "Debe haber exactamente 2 sensores de temperatura");
     assertEquals(1, listaHumedad.size(), "Debe haber exactanebte 1 sensor de humedad");
   }
 
-  // TEST 4: Comprobar la autogeneración de IDs estáticos
+  /**
+   * Verifica que la generación de identificadores estáticos de los sensores
+   * funciona correctamente, asignando el prefijo adecuado y garantizando que
+   * son únicos.
+   */
   @Test
   void testGeneracionIDsUnicos() {
     SensorPresionAtmosferica p1 = new SensorPresionAtmosferica();
     SensorPresionAtmosferica p2 = new SensorPresionAtmosferica();
 
-    // Comprobamos que no son nulos
     assertNotNull(p1.getIdentificador());
     assertNotNull(p2.getIdentificador());
 
-    // Comprobamos que empiezan por su prefijo correcto
     assertTrue(p1.getIdentificador().startsWith("PRES-"), "El ID debe empezar por PRES-");
 
-    // Comprobamos que los IDs son diferentes entre sí gracias al contador estático
     assertNotEquals(p1.getIdentificador(), p2.getIdentificador(),
         "Los IDs deben ser distintos");
   }

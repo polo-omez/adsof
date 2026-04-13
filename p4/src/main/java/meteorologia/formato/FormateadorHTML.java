@@ -3,6 +3,14 @@ package meteorologia.formato;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Clase encargada de formatear documentos a código HTML.
+ *
+ * @author Pablo Gómez
+ * @author Jose Antonio Gómez
+ * @version 1.0
+ *          Nombre del fichero: FormateadorHTML.java
+ */
 public class FormateadorHTML implements IFormateador {
 
   @Override
@@ -35,5 +43,4 @@ public class FormateadorHTML implements IFormateador {
   public String getExtension() {
     return ".html";
   }
-
 }

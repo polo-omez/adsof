@@ -36,5 +36,4 @@ public class SensorHumedad extends SensorMeteorologico {
   public SensorHumedad() {
     this(new EstrategiaGeneracionSimilar(20, 40));
   }
-
 }

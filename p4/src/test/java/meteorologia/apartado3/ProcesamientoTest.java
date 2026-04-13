@@ -8,8 +8,24 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Clase de pruebas unitarias para validar los conversores de unidades
+ * y el procesamiento del historial de datos.
+ *
+ * @author Pablo Gómez
+ * @author Jose Antonio Gómez
+ * @version 1.0
+ *          Nombre del fichero: ProcesamientoTest.java
+ */
 public class ProcesamientoTest {
 
+  /**
+   * Verifica que un conversor simple realiza correctamente la transformación
+   * matemática entre dos unidades conocidas.
+   *
+   * @throws ConversionNoCompatibleException Si hay error al configurar la
+   *                                         conversión.
+   */
   @Test
   public void testConversorTemperaturaSimple() throws ConversionNoCompatibleException {
     IConversor conversor = new ConversorTemperatura(UnidadTemperatura.CELSIUS, UnidadTemperatura.KELVIN);
@@ -18,6 +34,13 @@ public class ProcesamientoTest {
     assertEquals(373.15, conversor.convertir(100.0), 0.01);
   }
 
+  /**
+   * Verifica que la unión de múltiples conversores en cadena traslada el dato
+   * final correctamente aplicando todas las operaciones secuenciales.
+   *
+   * @throws ConversionNoCompatibleException Si las unidades intermedias no son
+   *                                         compatibles.
+   */
   @Test
   public void testConversorConcatenado() throws ConversionNoCompatibleException {
     IConversor c1 = new ConversorTemperatura(UnidadTemperatura.CELSIUS, UnidadTemperatura.KELVIN);
@@ -28,27 +51,29 @@ public class ProcesamientoTest {
     assertEquals(32.0, concatenado.convertir(0.0), 0.01);
   }
 
+  /**
+   * Verifica que el sistema impide la creación de un conversor encadenado
+   * si la unidad de destino del primero no coincide con el origen del segundo.
+   */
   @Test
   public void testExcepcionConversorIncompatible() {
     IConversor c1 = new ConversorTemperatura(UnidadTemperatura.CELSIUS, UnidadTemperatura.KELVIN);
     IConversor c2 = new ConversorTemperatura(UnidadTemperatura.FAHRENHEIT, UnidadTemperatura.CELSIUS);
 
-    // SIN LAMBDAS: Usamos el patrón clásico try-catch
     try {
-      // Intentamos hacer algo que sabemos que debe fallar
       new ConversorConcatenado(c1, c2);
 
-      // Si el código llega a esta línea, es que NO ha saltado la excepción, por tanto
-      // el test falla
       fail("Debería haber lanzado ConversionNoCompatibleException por no encajar las unidades");
 
     } catch (ConversionNoCompatibleException e) {
-      // Si el código entra en este catch, es que la excepción saltó correctamente. El
-      // test pasa.
       assertNotNull(e.getMessage());
     }
   }
 
+  /**
+   * Verifica que el procesador de datos consolida adecuadamente una serie
+   * de lecturas, calculando bien los mínimos, máximos y medias.
+   */
   @Test
   public void testProcesadorDatosEstadisticas() {
     ProcesadorDatos procesador = new ProcesadorDatos(new ConversorIdentidad(UnidadHumedad.PORCENTAJE));
@@ -63,13 +88,18 @@ public class ProcesamientoTest {
     assertEquals(40.0, procesador.getMedia(), 0.01);
   }
 
+  /**
+   * Verifica la integración completa entre un sensor, su estrategia de
+   * generación y el conversor asociado al procesador de datos.
+   *
+   * @throws Exception Si ocurre un fallo no capturado durante el test.
+   */
   @Test
   public void testIntegracionSensorConProcesador() throws Exception {
-    // SIN LAMBDAS: Creamos una clase anónima que implementa la interfaz al vuelo
     IEstrategia estrategiaFija = new IEstrategia() {
       @Override
       public double generarValor() {
-        return 20.0; // Siempre devuelve 20.0 para hacer el test predecible
+        return 20.0;
       }
     };
 

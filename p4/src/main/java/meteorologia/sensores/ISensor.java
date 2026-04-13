@@ -32,6 +32,10 @@ public interface ISensor {
    */
   public LocalDate getFechaInstalacion();
 
+  /**
+   * Obtiene la unidad de lectura actual configurada en el sensor.
+   * * @return Objeto IUnidad.
+   */
   public IUnidad getUnidadDeLectura();
 
   /**
@@ -45,6 +49,10 @@ public interface ISensor {
    * Obliga al sensor a registrar una nueva medición.
    *
    * @param fechaMedicion Fecha y hora de la lectura.
+   * @throws AlertaMeteorologicaException    Si surge alguna alerta durante la
+   *                                         medición.
+   * @throws ConversionNoCompatibleException Si hay errores con las conversiones
+   *                                         de unidades.
    */
   public void medir(LocalDateTime fechaMedicion) throws AlertaMeteorologicaException, ConversionNoCompatibleException;
 
@@ -55,6 +63,12 @@ public interface ISensor {
    */
   public void calibrar(double offset);
 
+  /**
+   * Aplica un valor de corrección al sensor por un tiempo determinado.
+   *
+   * @param offset       Valor numérico a ajustar.
+   * @param diasDuracion Duración de la calibración en días.
+   */
   public void calibrar(double offset, int diasDuracion);
 
   /**
@@ -64,9 +78,25 @@ public interface ISensor {
    */
   public boolean estaCalibrado();
 
+  /**
+   * Modifica la estrategia de generación de valores del sensor.
+   * * @param nuevaEstrategia La estrategia a emplear.
+   */
   public void setEstrategiaGeneracion(IEstrategia nuevaEstrategia);
 
+  /**
+   * Cambia el conversor de datos del sensor.
+   * * @param conversor El nuevo conversor a utilizar.
+   * 
+   * @throws ConversionNoCompatibleException Si el conversor es incompatible con
+   *                                         la unidad.
+   */
   public void cambiarConversor(IConversor conversor) throws ConversionNoCompatibleException;
 
+  /**
+   * Establece el porcentaje a partir del cual se considera que hay un cambio
+   * brusco.
+   * * @param porcentaje Valor porcentual (ej. 0.50 para 50%).
+   */
   public void setUmbralCambioBrusco(double porcentaje);
 }

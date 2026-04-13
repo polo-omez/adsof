@@ -1,135 +1,17 @@
 @startuml
 skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam packageStyle frame
 
 ' ==========================================
-' SENSORES
+' ENUMS GLOBALES
 ' ==========================================
-
-' ==INTERFACES==
-package "sensores" <<Frame>> #DDDDDD{
-  interface ISensor {
-      + getIdentificador(): String
-      + medir()
-      + calibrar(offset: double)
-      + estaCalibrado(): boolean
-  }
-
-  interface IUnidad {
-      + getSimbolo(): String
-  }
-
-  ' ==CLASES==
-  abstract class SensorMeteorologico {
-      - id: String
-      - offsetCalibracion: double
-      - ultimaLectura: double
-      - fechaUltimaLectura: LocalDateTime
-      - fechaInstalacion: LocalDateTime
-  }
-
-  class SensorTemperatura {
-      {static} - contador: int
-      + cambiarUnidad(u: UnidadTemperatura)
-  }
-
-  class SensorHumedad {
-      {static} - contador: int
-  }
-
-  class SensorPresionAtmosferica {
-      {static} - contador: int
-  }
-
-  class Rango {
-      - valorMinimo: double
-      - valorMaximo: double
-      + enRango(valor: double): boolean
-  }
-
-
-  ' ==ENUMERACIONES==
-  enum UnidadTemperatura <<enumeration>> {
-      CELSIUS
-      FAHRENHEIT
-      KELVIN
-      --
-      + getSimbolo(): String
-  }
-
-  enum UnidadHumedad <<enumeration>> {
-      PORCENTAJE
-      --
-      + getSimbolo(): String
-  }
-
-  enum UnidadPresionAtmosferica <<enumeration>> {
-      HECTOPASCALES
-      PASCALES
-      MILIBARES
-      --
-      + getSimbolo(): String
-  }
-
-
-}
-
-' ==========================================
-' PROCESAMIENTO
-' ==========================================
-package "procesamiento" <<Frame>> #DDDDDD {
-
-'==INTERFACES== 
-interface IConversor{
-  + getUnidadOrigen(): IUnidad;
-  + getUnidadDestino(): IUnidad;
-  + convertir(valor: double): double;
-}
-
-'==CLASES== 
-    class ProcesadorDatos {
-        + registrarLectura(valor: double)
-        + getMedia(): double
-        + getMinimo(): double
-        + getMaximo(): double
-    }
-    class Lectura {
-        - valor: double
-        - fechaHora: LocalDateTime
-    }
-
-    class ConversorIdentidad {
-    }
-
-    class ConversorTemperatura{
-        - origen: UnidadTemperatura
-        - destino: UnidadTemperatura
-        + getFactorConversion(): double
-    }
-    
-    class ConversorPresion {
-        - origen: UnidadPresionAtmosferica
-        - destino: UnidadPresionAtmosferica
-        + getFactorConversion(): double
-    }
-
-    class ConversorConcatenado {
-
-    }
-
-}
-
-
-
-' ==========================================
-' METEREOLOGIA
-' ==========================================
-class EstacionMeteorologica {
-    - nombre: String
-    + addSensor(sensor: ISensor)
-    + lanzarMedicion(fecha: LocalDateTime)
-    + medicionPeriodica(horasIntervalo: double, lecturasMaximas: int)
-    + getSensor(id: String): ISensor
-    + getSensores(tipo: Class<?>): List<ISensor>
+enum TipoSensor <<enumeration>> {
+    TEMPERATURA
+    HUMEDAD
+    PRESION_ATMOSFERICA
+    --
+    + crearSensor(): ISensor
 }
 
 class Ubicacion {
@@ -137,74 +19,245 @@ class Ubicacion {
     - longitud: double
 }
 
+' ==========================================
+' SENSORES
+' ==========================================
+package "sensores" #DDDDDD {
+    interface ISensor {
+        + getIdentificador(): String
+        + medir(fechaMedicion: LocalDateTime)
+        + calibrar(offset: double, diasDuracion: int)
+        + estaCalibrado(): boolean
+        + setEstrategiaGeneracion(nuevaEstrategia: IEstrategia)
+        + cambiarConversor(conversor: IConversor)
+        + setUmbralCambioBrusco(porcentaje: double)
+    }
 
+    interface IUnidad {
+        + getSimbolo(): String
+    }
+
+    abstract class SensorMeteorologico {
+        - id: String
+        - offsetCalibracion: double
+        - ultimaLectura: double
+        - fechaUltimaLectura: LocalDateTime
+        - fechaInstalacion: LocalDate
+        - fechaUltimaCalibracion: LocalDate
+        - diasDuracionCalibracion: int
+        - umbralCambioBrusco: double
+        - operativo: boolean
+    }
+
+    class SensorTemperatura {
+        {static} - contador: int
+    }
+
+    class SensorHumedad {
+        {static} - contador: int
+    }
+
+    class SensorPresionAtmosferica {
+        {static} - contador: int
+        + cambiarUnidad(unidad: UnidadPresion)
+    }
+
+    class Rango {
+        - valorMinimo: double
+        - valorMaximo: double
+        + enRango(valor: double): boolean
+    }
+
+    enum UnidadTemperatura <<enumeration>> {
+        CELSIUS
+        FAHRENHEIT
+        KELVIN
+    }
+
+    enum UnidadHumedad <<enumeration>> {
+        PORCENTAJE
+    }
+
+    enum UnidadPresion <<enumeration>> {
+        HECTOPASCALES
+        PASCALES
+        MILIBARES
+    }
+}
 
 ' ==========================================
 ' ESTRATEGIAS
 ' ==========================================
+package "estrategias" #DDDDDD {
+    interface IEstrategia {
+        + generarValor(): double
+    }
 
-package "estrategias" <<Frame>> #DDDDDD{
-  interface IEstrategia{
-    + generarValor(): double
-  }
+    class EstrategiaGeneracionEnRango {
+        - probabilidadDesborde: double
+        - rand: Random
+    }
 
-  class EstrategiaGeneracionEnRango {
-    - minimo: double
-    - maximo: double
-    - probabilidadDesborde: double
+    class EstrategiaGeneracionSimilar {
+        - probDesviacion: double
+        - ultimoValor: double
+        - rand: Random
+    }
 
-  }
-
-  class EstrategiaGeneracionSimilar {
-    - porcentajeDesviacion: double
-
-  }
-
-  class EstrategiaGeneracionEnMedia{
-    - porcentajeDesviacion: double
-
-  }
+    class EstrategiaGeneracionEnMedia {
+        - probDesviacion: double
+        - historialValores: List<Double>
+        - rand: Random
+    }
 }
+
+' ==========================================
+' PROCESAMIENTO
+' ==========================================
+package "procesamiento" #DDDDDD {
+    interface IConversor {
+        + getUnidadOrigen(): IUnidad
+        + getUnidadDestino(): IUnidad
+        + convertir(valor: double): double
+    }
+
+    class ProcesadorDatos {
+        - minimoLeido: double
+        - maximoLeido: double
+        + addLectura(valorLectura: double, fechaLectura: LocalDateTime)
+        + getMedia(): double
+    }
+
+    class Lectura {
+        - valor: double
+        - fecha: LocalDateTime
+    }
+
+    class ConversorIdentidad
+    class ConversorTemperatura
+    class ConversorPresion 
+    class ConversorConcatenado
+}
+
+' ==========================================
+' EXCEPCIONES Y ALERTAS
+' ==========================================
+package "excepciones" #DDDDDD {
+    class ConversionNoCompatibleException
+    class SensorDuplicadoException
+    class SensorNoEncontradoException
+}
+
+package "alertas" #DDDDDD {
+    abstract class AlertaMeteorologicaException
+    
+    abstract class SensorSinCalibrarException
+    
+    class CalibracionCaducadaException {
+        - fechaCaducidad: LocalDate
+    }
+    
+    class LecturaFueraDeRangoException {
+        - lecturaFallida: double
+    }
+    
+    class CambioBruscoException {
+        - valorAnterior: double
+        - valorNuevo: double
+    }
+
+    class RegistroAlerta {
+        - fecha: LocalDateTime
+    }
+}
+
+' ==========================================
+' FORMATO
+' ==========================================
+package "formato" #DDDDDD {
+    interface IDocumento {
+        + getTituloDocumento(): String
+        + getSeccionPricipalDocumento(): String
+        + getParrafosDocumento(): List<String>
+        + getColeccionesDocumento(): Map<String, List<String>>
+    }
+
+    interface IFormateador {
+        {static} + DIRECTORIO_SALIDA: String
+        + formatear(doc: IDocumento): String
+        + getExtension(): String
+        + exportar(doc: IDocumento)
+    }
+
+    class FormateadorHTML
+    class FormateadorMarkdown
+}
+
+' ==========================================
+' METEOROLOGÍA (CORE)
+' ==========================================
+class EstacionMeteorologica {
+    - nombre: String
+    - ultimaLectura: LocalDateTime
+    + crearSensor(tipo: TipoSensor, estrategiaGeneracion: IEstrategia): String
+    + asociarConversor(sensorId: String, nuevoConversor: IConversor)
+    + addSensor(sensor: ISensor)
+    + calibrarSensor(sensorId: String, offset: double, diasDuracion: int)
+    + lanzarMedicion(fechaMedicion: LocalDateTime)
+    + medicionPeriodica(horasIntervalo: double, lecturasMaximas: int)
+    + getSensor(sensorId: String): ISensor
+    + getSensores(tipo: Class<?>): List<ISensor>
+}
+
 ' ==========================================
 ' RELACIONES
 ' ==========================================
 
-' Implementaciones (Realization) -> Línea punteada con flecha hueca
+' Realizaciones (Implementaciones)
 ISensor <|.. SensorMeteorologico
-
 IUnidad <|.. UnidadTemperatura
 IUnidad <|.. UnidadHumedad
-IUnidad <|.. UnidadPresionAtmosferica
-
+IUnidad <|.. UnidadPresion
 IEstrategia <|.. EstrategiaGeneracionEnRango 
 IEstrategia <|.. EstrategiaGeneracionSimilar
 IEstrategia <|.. EstrategiaGeneracionEnMedia 
-
 IConversor <|.. ConversorIdentidad
 IConversor <|.. ConversorTemperatura
 IConversor <|.. ConversorPresion 
 IConversor <|.. ConversorConcatenado
+IDocumento <|.. EstacionMeteorologica
+IFormateador <|.. FormateadorHTML
+IFormateador <|.. FormateadorMarkdown
 
-' Herencia (Extension) --> Línea continua con flecha hueca
+' Herencia
 SensorMeteorologico <|-- SensorTemperatura
 SensorMeteorologico <|-- SensorHumedad
 SensorMeteorologico <|-- SensorPresionAtmosferica
+AlertaMeteorologicaException <|-- SensorSinCalibrarException
+AlertaMeteorologicaException <|-- CambioBruscoException
+SensorSinCalibrarException <|-- CalibracionCaducadaException
+SensorSinCalibrarException <|-- LecturaFueraDeRangoException
 
-' Agregación y Composición
-EstacionMeteorologica o-- "*" ISensor : sensores: Map<String, ISensor>
+' Composiciones y Agregaciones
+EstacionMeteorologica o-- "*" ISensor : sensores
 EstacionMeteorologica *-- "1" Ubicacion : ubicacionGeografica
+EstacionMeteorologica *-- "*" RegistroAlerta : historialAlertas
 
-SensorMeteorologico *--  ProcesadorDatos : "procesador"
+SensorMeteorologico *-- ProcesadorDatos : procesadorDatos
+ProcesadorDatos *-- "*" Lectura : historial
+ConversorConcatenado o-- IConversor : conversorOrigen
+ConversorConcatenado o-- IConversor : conversorDestino
 
-ProcesadorDatos *-- "*" Lectura: historial
-ConversorConcatenado o-- IConversor: origen
-ConversorConcatenado o-- IConversor: destino
+RegistroAlerta o-- AlertaMeteorologicaException : excepcion
 
-' Asociaciones dirigidas
-SensorMeteorologico -->  Rango : rangoValores
-SensorMeteorologico -->  IUnidad : unidadDeLectura
-SensorMeteorologico -up-> IEstrategia: estrategiaGeneracion
-
-ProcesadorDatos -->  IConversor: conversor
+' Dependencias / Asociaciones
+SensorMeteorologico --> Rango : rangoValores
+SensorMeteorologico --> IUnidad : unidadDeLectura
+SensorMeteorologico --> IEstrategia: estrategiaGeneracion
+ProcesadorDatos --> IConversor: conversor
+AlertaMeteorologicaException --> ISensor : sensorAsociado
+EstrategiaGeneracionEnRango --> Rango : rango
+IFormateador ..> IDocumento : formatea >
+TipoSensor ..> ISensor : crea >
 
 @enduml

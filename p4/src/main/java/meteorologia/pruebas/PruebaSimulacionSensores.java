@@ -5,22 +5,30 @@ import meteorologia.EstacionMeteorologica;
 import meteorologia.TipoSensor;
 import meteorologia.excepciones.*;
 import meteorologia.procesamiento.*;
+import meteorologia.formato.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
+/**
+ * Clase de prueba para simular el comportamiento básico de los sensores.
+ *
+ * @author Pablo Gómez
+ * @author Jose Antonio Gómez
+ * @version 1.0
+ *          Nombre del fichero: PruebaSimulacionSensores.java
+ */
 public class PruebaSimulacionSensores {
 
+  /**
+   * Método principal de ejecución de la simulación.
+   *
+   * @param args Argumentos pasados por línea de comandos.
+   */
   public static void main(String[] args) {
     System.out.println("--- INICIANDO SIMULACIÓN DE LA ESTACIÓN METEOROLÓGICA ---");
 
-    // 1. Creamos la Estación
     EstacionMeteorologica estacion = new EstacionMeteorologica("Estación Central", 40.4165, -3.7026);
 
-    // 2. Creamos los sensores (usarán sus estrategias por defecto internamente)
-
-    // 4. Registramos los sensores en la estación
     try {
       String sensor1 = estacion.crearSensor(TipoSensor.TEMPERATURA, null);
       estacion.asociarConversor(sensor1,
@@ -35,13 +43,12 @@ public class PruebaSimulacionSensores {
       estacion.crearSensor(TipoSensor.PRESION_ATMOSFERICA, null);
       estacion.crearSensor(TipoSensor.HUMEDAD, null);
 
-    } catch (SensorDuplicadoException e) {
+    } catch (SensorDuplicadoException | ConversionNoCompatibleException | SensorNoEncontradoException e) {
       System.err.println("Error al añadir sensores: " + e.getMessage());
     } catch (Exception e) {
       System.err.println("Error al añadir sensores: " + e.getMessage());
     }
 
-    // 5. Lanzamos las mediciones
     try {
       estacion.lanzarMedicion(LocalDateTime.now());
       estacion.medicionPeriodica(0.5, 3);
@@ -49,11 +56,7 @@ public class PruebaSimulacionSensores {
       System.err.println("Error al lanzar mediciones: " + e.getMessage());
     }
 
-    // 6. IMPRIMIMOS EL RESULTADO FINAL
     System.out.println("\n--- ESTADO ACTUAL DE LOS SENSORES ---");
-
-    // Obtener todos los sensores (suponiendo que tu mapa se pasa a Lista)
-    // Imprimir la lista directamente invocará el toString() que acabamos de hacer
     System.out.println(estacion);
   }
 }

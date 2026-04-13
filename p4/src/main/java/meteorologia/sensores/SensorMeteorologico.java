@@ -38,10 +38,13 @@ public abstract class SensorMeteorologico implements ISensor {
   private IUnidad unidadDeLectura;
   /** Motor que simula la generación de valores para las mediciones. */
   private IEstrategia estrategiaGeneracion;
-
+  /** Procesador de datos que almacena el historial y aplica conversiones. */
   private ProcesadorDatos procesadorDatos;
+  /** Duración en días de la validez de la calibración actual. */
   private int diasDuracionCalibracion;
+  /** Porcentaje de variación a partir del cual se considera cambio brusco. */
   private double umbralCambioBrusco;
+  /** Estado de operatividad del sensor. */
   private boolean operativo;
 
   /**
@@ -62,8 +65,8 @@ public abstract class SensorMeteorologico implements ISensor {
     this.estrategiaGeneracion = estrategiaGeneracion;
     this.procesadorDatos = new ProcesadorDatos(new ConversorIdentidad(this.unidadDeLectura));
     this.diasDuracionCalibracion = 365;
-    this.umbralCambioBrusco = 0.50; // 50% por defecto
-    this.operativo = true; // El sensor nace funcionando
+    this.umbralCambioBrusco = 0.50;
+    this.operativo = true;
   }
 
   /**
@@ -93,6 +96,11 @@ public abstract class SensorMeteorologico implements ISensor {
     return fechaUltimaLecutra;
   }
 
+  /**
+   * Obtiene el procesador de datos asociado al sensor.
+   *
+   * @return El procesador de datos.
+   */
   public ProcesadorDatos getProcesadorDatos() {
     return procesadorDatos;
   }
@@ -125,39 +133,24 @@ public abstract class SensorMeteorologico implements ISensor {
     this.umbralCambioBrusco = porcentaje;
   }
 
-  /**
-   * Obtiene el identificador único del sensor.
-   *
-   * @return La cadena de texto con el ID.
-   */
   @Override
   public String getIdentificador() {
     return this.id;
   }
 
-  /**
-   * Obtiene la fecha de instalación del sensor.
-   *
-   * @return Objeto LocalDate indicando cuándo se instaló.
-   */
   @Override
   public LocalDate getFechaInstalacion() {
     return fechaInstalacion;
   }
 
   @Override
-  /**
-   * Obtiene la unidad de medida actual del sensor.
-   *
-   * @return Objeto que representa la unidad configurada.
-   */
   public IUnidad getUnidadDeLectura() {
     return unidadDeLectura;
   }
 
   @Override
   public void calibrar(double offset) {
-    this.calibrar(offset, 365); // 365 días por defecto
+    this.calibrar(offset, 365);
   }
 
   @Override
@@ -165,14 +158,9 @@ public abstract class SensorMeteorologico implements ISensor {
     this.offsetCalibracion = offset;
     this.diasDuracionCalibracion = diasDuracion;
     this.fechaUltimaCalibracion = LocalDate.now();
-    this.operativo = true; // "En los casos en que la toma estaba detenida, deberá retomarse"
+    this.operativo = true;
   }
 
-  /**
-   * Asigna la fecha en la que el sensor es instalado.
-   *
-   * @param fecha La fecha de instalación.
-   */
   @Override
   public void setFechaInstalacion(LocalDate fecha) {
     this.fechaInstalacion = fecha;
@@ -187,54 +175,38 @@ public abstract class SensorMeteorologico implements ISensor {
     this.procesadorDatos.setConversor(nuevoConversor);
   }
 
-  /**
-   * Verifica si el sensor se encuentra calibrado comprobando si la última lectura
-   * está en rango.
-   *
-   * @return true si el sensor está operativo y calibrado, false en caso
-   *         contrario.
-   */
   @Override
   public boolean estaCalibrado() {
-    LocalDate fechaCaducidad = this.fechaUltimaCalibracion.plusDays(this.diasDuracionCalibracion);
-    // Si HOY es posterior o igual a la fecha de caducidad, ya no está calibrado
-    if (LocalDate.now().isAfter(fechaCaducidad) || LocalDate.now().isEqual(fechaCaducidad)) {
-      this.operativo = false; // Se detiene por seguridad
+    if (!this.operativo) {
       return false;
     }
+
+    LocalDate fechaCaducidad = this.fechaUltimaCalibracion.plusDays(this.diasDuracionCalibracion);
+    if (LocalDate.now().isAfter(fechaCaducidad) || LocalDate.now().isEqual(fechaCaducidad)) {
+      this.operativo = false;
+      return false;
+    }
+
     return true;
   }
 
-  /**
-   * Ejecuta una nueva medición utilizando la estrategia asignada y aplicando el
-   * offset de calibración.
-   *
-   * @param fechaMedicion La fecha y hora exactas en la que se registra la
-   *                      medición.
-   */
   @Override
   public void medir(LocalDateTime fechaMedicion) throws AlertaMeteorologicaException {
-
-    // 1. Validar operatividad y calibración ANTES de hacer nada
     if (!this.operativo || !this.estaCalibrado()) {
       this.operativo = false;
       LocalDate fechaCaducidad = this.fechaUltimaCalibracion.plusDays(this.diasDuracionCalibracion);
       throw new CalibracionCaducadaException(this, fechaCaducidad);
     }
 
-    // 2. Generar el valor
     double valorAnterior = this.ultimaLectura;
     double valorGenerado = this.estrategiaGeneracion.generarValor() - this.offsetCalibracion;
 
-    // 3. Validar Rango (Fallo Fatal)
     if (!this.rangoValores.enRango(valorGenerado)) {
-      this.operativo = false; // "Evitar medir en sensores fuera de rango"
+      this.operativo = false;
       throw new LecturaFueraDeRangoException(this, valorGenerado);
     }
 
-    // 4. Calcular Cambio Brusco (Warning)
     boolean hayCambioBrusco = false;
-    // Evitamos división por cero al calcular el porcentaje
     if (Math.abs(valorAnterior) > 0.0001) {
       double diferenciaPorcentual = Math.abs(valorGenerado - valorAnterior) / Math.abs(valorAnterior);
       if (diferenciaPorcentual > this.umbralCambioBrusco) {
@@ -242,7 +214,6 @@ public abstract class SensorMeteorologico implements ISensor {
       }
     }
 
-    // 5. Consolidar el dato (Llegamos aquí porque no hubo fallos fatales)
     this.ultimaLectura = valorGenerado;
     this.fechaUltimaLecutra = fechaMedicion;
 
@@ -253,17 +224,11 @@ public abstract class SensorMeteorologico implements ISensor {
       System.err.println("Error de conversión en sensor " + this.id + ": " + e.getMessage());
     }
 
-    // 6. Lanzar la alerta (si aplica) DESPUÉS de guardar el dato válido
     if (hayCambioBrusco) {
       throw new CambioBruscoException(this, valorAnterior, valorGenerado);
     }
   }
 
-  /**
-   * Devuelve una representación en cadena con los datos comunes de la lectura.
-   *
-   * @return Cadena con el formato de lectura y fecha truncada a segundos.
-   */
   @Override
   public String toString() {
     String string = this.getIdentificador() + " (" + this.unidadDeLectura.getSimbolo() + ")";

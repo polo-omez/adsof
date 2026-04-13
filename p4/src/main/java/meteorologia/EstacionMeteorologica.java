@@ -6,11 +6,8 @@ import java.time.temporal.ChronoUnit;
 import java.time.LocalDateTime;
 
 import meteorologia.sensores.ISensor;
-import meteorologia.sensores.IUnidad;
 import meteorologia.alertas.*;
 import meteorologia.estrategias.IEstrategia;
-import meteorologia.sensores.SensorMeteorologico;
-import meteorologia.sensores.SensorTemperatura;
 import meteorologia.procesamiento.IConversor;
 import meteorologia.excepciones.*;
 import meteorologia.formato.IDocumento;
@@ -30,9 +27,9 @@ public class EstacionMeteorologica implements IDocumento {
   private Ubicacion ubicacionGeografica;
   /** Mapa de sensores registrados en la estación indexados por su ID. */
   private Map<String, ISensor> sensores;
-
+  /** Historial de alertas registradas por los sensores. */
   private List<RegistroAlerta> historialAlertas;
-
+  /** Fecha y hora de la última lectura global realizada. */
   private LocalDateTime ultimaLectura;
 
   /**
@@ -47,7 +44,7 @@ public class EstacionMeteorologica implements IDocumento {
     this.ubicacionGeografica = new Ubicacion(latitud, longitud);
     this.sensores = new LinkedHashMap<>();
     this.ultimaLectura = LocalDateTime.now();
-    this.historialAlertas = new ArrayList<>(); // Inicializar historial
+    this.historialAlertas = new ArrayList<>();
   }
 
   /**
@@ -68,6 +65,16 @@ public class EstacionMeteorologica implements IDocumento {
     return this.sensores;
   }
 
+  /**
+   * Crea un nuevo sensor del tipo especificado y lo asocia a la estación.
+   *
+   * @param tipo                 El tipo de sensor a crear.
+   * @param estrategiaGeneracion La estrategia de generación de datos a utilizar
+   *                             (puede ser null).
+   * @return El identificador único del sensor creado.
+   * @throws SensorDuplicadoException Si ocurre un error de duplicidad al
+   *                                  registrar el sensor.
+   */
   public String crearSensor(TipoSensor tipo, IEstrategia estrategiaGeneracion)
       throws SensorDuplicadoException {
     ISensor nuevoSensor;
@@ -79,10 +86,19 @@ public class EstacionMeteorologica implements IDocumento {
     return nuevoSensor.getIdentificador();
   }
 
+  /**
+   * Asocia un nuevo conversor de unidades a un sensor existente.
+   *
+   * @param sensorId       El identificador del sensor.
+   * @param nuevoConversor El conversor a asociar.
+   * @throws SensorNoEncontradoException     Si el sensor no existe en la
+   *                                         estación.
+   * @throws ConversionNoCompatibleException Si el conversor no es compatible con
+   *                                         la unidad del sensor.
+   */
   public void asociarConversor(String sensorId, IConversor nuevoConversor)
       throws SensorNoEncontradoException, ConversionNoCompatibleException {
     this.getSensor(sensorId).cambiarConversor(nuevoConversor);
-
   }
 
   /**
@@ -148,18 +164,27 @@ public class EstacionMeteorologica implements IDocumento {
     return sensoresTipo;
   }
 
+  /**
+   * Calibra un sensor específico y limpia su historial de alertas.
+   *
+   * @param sensorId     El identificador del sensor a calibrar.
+   * @param offset       El valor de ajuste para la calibración.
+   * @param diasDuracion La duración en días de la calibración.
+   * @throws SensorNoEncontradoException Si el sensor indicado no existe.
+   */
   public void calibrarSensor(String sensorId, double offset, int diasDuracion) throws SensorNoEncontradoException {
     ISensor sensor = this.getSensor(sensorId);
-
-    // 1. Calibrar físicamente el sensor (lo reactiva por dentro)
     sensor.calibrar(offset, diasDuracion);
-
-    // 2. Eliminar todas las alertas previas asociadas a su ID
-    // removeIf es la forma más limpia y moderna en Java de borrar filtrando
     this.historialAlertas.removeIf(alerta -> alerta.getSensorInvolucrado().getIdentificador().equals(sensorId));
   }
 
-  // Sobrecarga por comodidad
+  /**
+   * Calibra un sensor específico con una duración por defecto de un año.
+   *
+   * @param sensorId El identificador del sensor a calibrar.
+   * @param offset   El valor de ajuste para la calibración.
+   * @throws SensorNoEncontradoException Si el sensor indicado no existe.
+   */
   public void calibrarSensor(String sensorId, double offset) throws SensorNoEncontradoException {
     this.calibrarSensor(sensorId, offset, 365);
   }
@@ -168,23 +193,16 @@ public class EstacionMeteorologica implements IDocumento {
    * Obliga a todos los sensores registrados a realizar una medición puntual.
    *
    * @param fechaMedicion La fecha y hora exacta de la medición.
+   * @throws ConversionNoCompatibleException Si hay problemas de conversión de
+   *                                         unidades durante la medición.
    */
   public void lanzarMedicion(LocalDateTime fechaMedicion) throws ConversionNoCompatibleException {
     for (ISensor sensor : this.sensores.values()) {
       try {
-        // Intentamos ejecutar la medición normal
         sensor.medir(fechaMedicion);
-
-      } catch (SensorSinCalibrarException e) {
-        // Captura Fallo Fatal (Caducado o Fuera de Rango). El sensor YA se ha detenido.
+      } catch (SensorSinCalibrarException | CambioBruscoException e) {
         this.historialAlertas.add(new RegistroAlerta(fechaMedicion, e));
-
-      } catch (CambioBruscoException e) {
-        // Captura Warning. El sensor GUARDÓ el dato, pero anotamos el susto.
-        this.historialAlertas.add(new RegistroAlerta(fechaMedicion, e));
-
       } catch (AlertaMeteorologicaException e) {
-        // Un "Catch-All" por si en el futuro inventamos más tipos de alertas
         this.historialAlertas.add(new RegistroAlerta(fechaMedicion, e));
       }
     }
@@ -195,6 +213,8 @@ public class EstacionMeteorologica implements IDocumento {
    *
    * @param horasIntervalo  Las horas de separación entre cada medición simulada.
    * @param lecturasMaximas El número total de mediciones que se realizarán.
+   * @throws ConversionNoCompatibleException Si hay un fallo de compatibilidad de
+   *                                         conversiones.
    */
   public void medicionPeriodica(double horasIntervalo, int lecturasMaximas) throws ConversionNoCompatibleException {
     LocalDateTime fechaMedicion = LocalDateTime.now();
@@ -213,18 +233,15 @@ public class EstacionMeteorologica implements IDocumento {
    */
   @Override
   public String toString() {
-    // Formateo de los sensores
     StringBuilder salida = new StringBuilder();
     salida.append("Estación Meteorológica: ").append(this.nombre).append("\n");
     salida.append("Ubicación: ").append(this.ubicacionGeografica.toString()).append("\n");
     salida.append("Sensores instalados: ").append(this.sensores.size()).append("\n");
-    // (Podrías añadir la fecha global de última lectura aquí si la tuvieras)
 
     for (ISensor sensor : this.sensores.values()) {
       salida.append(sensor + "\n");
     }
 
-    // Formateo del panel de alertas
     if (!this.historialAlertas.isEmpty()) {
       salida.append("\nAlertas activas: ").append(this.historialAlertas.size()).append("\n");
       for (RegistroAlerta alerta : this.historialAlertas) {
@@ -273,6 +290,5 @@ public class EstacionMeteorologica implements IDocumento {
     }
 
     return colecciones;
-
   }
 }
