@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="meteorologia.apartado5.FormatoTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-04-13T09:46:43.396Z" hostname="hermes" time="0.011">
+  <properties/>
+  <testcase name="testGeneracionMarkdown()" classname="meteorologia.apartado5.FormatoTest" time="0.004"/>
+  <testcase name="testExportarCreaFicheroFisico()" classname="meteorologia.apartado5.FormatoTest" time="0.004"/>
+  <testcase name="testGeneracionHTML()" classname="meteorologia.apartado5.FormatoTest" time="0.001"/>
+  <system-out><![CDATA[DEBUG RUTA TEST: Buscando el fichero en -> /home/pbl/Documents/adsof/p4/informes/Estacion_Test.html
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
