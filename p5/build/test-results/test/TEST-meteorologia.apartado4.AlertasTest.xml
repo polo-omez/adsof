@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="meteorologia.apartado4.AlertasTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-04-13T09:46:43.391Z" hostname="hermes" time="0.005">
+  <properties/>
+  <testcase name="testLecturaFueraDeRango()" classname="meteorologia.apartado4.AlertasTest" time="0.001"/>
+  <testcase name="testCambioBruscoNoBloqueaSensor()" classname="meteorologia.apartado4.AlertasTest" time="0.001"/>
+  <testcase name="testCalibracionCaducadaBloqueaSensor()" classname="meteorologia.apartado4.AlertasTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
