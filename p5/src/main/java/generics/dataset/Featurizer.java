@@ -1,11 +1,14 @@
 package generics.dataset;
 
 import java.util.Set;
+import java.util.List;
 
-public interface Featurizer {
+public interface Featurizer<T> {
 
-  public <E extends Comparable<E>> Feature<E> feature(String field);
+  public <E extends Comparable<E>> Feature<E> feature(List<T> objects, String field);
 
-  public Set<String> freaturizeDataSet();
+  public Set<String> featurizeObject();
+
+  public <E extends Comparable<E>> E extractValue(T object, String field);
 
 }

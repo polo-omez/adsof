@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Feature<E extends Comparable<E>> extends ArrayList<E> {
+  E elementType;
 
   public E getMin() {
     if (this.isEmpty()) {

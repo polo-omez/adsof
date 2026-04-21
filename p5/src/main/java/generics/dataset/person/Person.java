@@ -13,4 +13,20 @@ public class Person {
     this.isMale = isMale;
   }
 
+  public String getName() {
+    return name;
+  }
+
+  public double getWeight() {
+    return weight;
+  }
+
+  public Integer getAge() {
+    return age;
+  }
+
+  public boolean isMale() {
+    return isMale;
+  }
+
 }

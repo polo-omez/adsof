@@ -10,7 +10,7 @@ import generics.dataset.Feature;
 import generics.dataset.Featurizer;
 
 public class PersonFeaturizer implements Featurizer<Person> {
-  private final Map<String, Function<Person, ? extends Comparable<?>>> fieldGetters = new HashMap<>();
+  private final Map<String, Function<Person, T extends Comparable<T>>> fieldGetters = new HashMap<>();
 
   public PersonFeaturizer() {
     fieldGetters.put("age", p -> p.getAge());
@@ -24,12 +24,8 @@ public class PersonFeaturizer implements Featurizer<Person> {
 
   @Override
   public <E extends Comparable<E>> Feature<E> feature(List<Person> personList, String field) {
-    Feature<E> feature = new Feature<E>();
-    for (Person person : personList) {
-      feature.add(extractValue(person, field));
-    }
-
-    return feature;
+    // TODO Auto-generated method stub
+    return null;
   }
 
   @Override
@@ -40,7 +36,7 @@ public class PersonFeaturizer implements Featurizer<Person> {
 
   @Override
   public <E extends Comparable<E>> E extractValue(Person person, String field) {
-    return (E) fieldGetters.get(field).apply(person);
+    return fieldGetters.get(field).apply(person);
   }
 
 }
