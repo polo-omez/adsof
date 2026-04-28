@@ -2,19 +2,25 @@ package generics.dataset;
 
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 
-public class Dataset<T> {
+public class Dataset<T extends Comparable<T>> {
   private List<T> data;
   private Featurizer<T> featurizer;
+  private Map<String, Feature<?>> dataByFeatures;
 
   public <F extends Featurizer<T>> Dataset(F featurizer) {
     this.featurizer = featurizer;
+    this.dataByFeatures = new LinkedHashMap<>();
+    this.data = new ArrayList<>();
   }
 
-  public boolean addAll(Collection<? extends T> c) {
-    return data.addAll(c);
+  @SafeVarargs
+  public final boolean addAll(T... elements) {
+    return data.addAll(List.of(elements));
   }
 
   public boolean add(T e) {
@@ -26,16 +32,24 @@ public class Dataset<T> {
   }
 
   public Map<String, Feature<?>> datasetByFeatures() {
-    Map<String, Feature<?>> featureByField = new HashMap<>();
     for (String field : this.featurizer.featurize()) {
-      featureByField.putIfAbsent(field, this.feature(field));
+      this.dataByFeatures.putIfAbsent(field, this.feature(field));
     }
-    return featureByField;
+    return this.dataByFeatures;
 
   }
 
   public void removeDuplicates() {
+    Set<T> uniqueData = new LinkedHashSet<>(this.data);
 
+    this.data = new ArrayList<>(uniqueData);
+
+    this.dataByFeatures.clear();
+  }
+
+  @Override
+  public String toString() {
+    return this.datasetByFeatures().toString();
   }
 
 }

@@ -1,6 +1,5 @@
 package generics.dataset.person;
 
-import java.util.Set;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,8 +31,8 @@ public class PersonFeaturizer implements Featurizer<Person> {
   }
 
   @Override
-  public Set<String> featurize() {
-    return this.featureGetters.keySet();
+  public List<String> featurize() {
+    return List.of("age", "weight", "gender");
   }
 
   @Override

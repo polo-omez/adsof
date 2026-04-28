@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group = 'meteorologia'
+group = 'generics'
 version = '1.0-SNAPSHOT'
 
 // Usamos Java 17 (puedes cambiarlo a 21 si usas esa versión)
@@ -37,7 +37,7 @@ tasks.named('test') {
 }
 
 
-def arbolArchivos = fileTree('src/main/java/meteorologia/pruebas') {
+def arbolArchivos = fileTree('src/main/java/generics/dataset/pruebas') {
     include '**/*.java'
 }
 
@@ -46,7 +46,7 @@ def listaDeTareas = []
 // 2. Por cada archivo, creamos una tarea JavaExec específica
 arbolArchivos.each { File archivo ->
     def nombreSimple = archivo.name.replace('.java', '')
-    def paqueteYClase = "meteorologia.pruebas.${nombreSimple}"
+    def paqueteYClase = "generics.dataset.pruebas.${nombreSimple}"
     def nombreTarea = "run_${nombreSimple}" // Ej: run_PruebaEnlaces
     
     tasks.register(nombreTarea, JavaExec) {

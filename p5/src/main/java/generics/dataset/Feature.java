@@ -7,7 +7,7 @@ import java.util.Map;
 public class Feature<E extends Comparable<E>> extends ArrayList<E> {
   E elementType;
 
-  public E getMin() {
+  public E min() {
     if (this.isEmpty()) {
       return null;
     }
@@ -21,7 +21,7 @@ public class Feature<E extends Comparable<E>> extends ArrayList<E> {
     return min;
   }
 
-  public E getMax() {
+  public E max() {
     if (this.isEmpty()) {
       return null;
     }
@@ -35,7 +35,7 @@ public class Feature<E extends Comparable<E>> extends ArrayList<E> {
     return max;
   }
 
-  public Map<E, Integer> getDistribution() {
+  public Map<E, Integer> distribution() {
     Map<E, Integer> distribution = new HashMap<>();
 
     for (E element : this) {
