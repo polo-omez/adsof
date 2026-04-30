@@ -1,4 +1,4 @@
-package generics.dataset.person;
+package generics.person;
 
 public class Person implements Comparable<Person> {
   private String name;
@@ -68,6 +68,17 @@ public class Person implements Comparable<Person> {
       return cmp;
 
     return this.isMale().compareTo(p.isMale());
+  }
+
+  @Override
+  public String toString() {
+    String string = this.name + "(age: " + this.age;
+    if (this.isMale) {
+      string += ", male)";
+    } else {
+      string += ", female)";
+    }
+    return string;
   }
 
 }

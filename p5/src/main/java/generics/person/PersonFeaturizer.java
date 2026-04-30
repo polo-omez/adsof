@@ -1,12 +1,12 @@
-package generics.dataset.person;
+package generics.person;
 
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import generics.dataset.Feature;
-import generics.dataset.Featurizer;
+import generics.Feature;
+import generics.Featurizer;
 
 public class PersonFeaturizer implements Featurizer<Person> {
   private final Map<String, Function<Person, ? extends Comparable<?>>> featureGetters = new HashMap<>();

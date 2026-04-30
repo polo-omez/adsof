@@ -1,4 +1,4 @@
-package generics.dataset.person;
+package generics.person;
 
 public enum Gender {
   MALE,

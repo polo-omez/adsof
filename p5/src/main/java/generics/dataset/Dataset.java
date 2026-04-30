@@ -1,5 +1,8 @@
 package generics.dataset;
 
+import generics.Feature;
+import generics.Featurizer;
+
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
@@ -7,7 +10,7 @@ import java.util.Set;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 
-public class Dataset<T extends Comparable<T>> {
+public class Dataset<T> {
   private List<T> data;
   private Featurizer<T> featurizer;
   private Map<String, Feature<?>> dataByFeatures;
@@ -16,6 +19,10 @@ public class Dataset<T extends Comparable<T>> {
     this.featurizer = featurizer;
     this.dataByFeatures = new LinkedHashMap<>();
     this.data = new ArrayList<>();
+  }
+
+  public List<T> getData() {
+    return data;
   }
 
   @SafeVarargs

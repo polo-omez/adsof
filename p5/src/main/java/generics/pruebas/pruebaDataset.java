@@ -1,8 +1,8 @@
-package generics.dataset.pruebas;
+package generics.pruebas;
 
 import generics.dataset.Dataset;
-import generics.dataset.Feature;
-import generics.dataset.person.*;
+import generics.Feature;
+import generics.person.*;
 
 import java.util.Collections;
 

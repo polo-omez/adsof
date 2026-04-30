@@ -1,4 +1,4 @@
-package generics.dataset;
+package generics;
 
 import java.util.List;
 
