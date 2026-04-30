@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class DecisionTree<T> {
   private Map<String, DecisionNode<T>> nodes;
@@ -25,6 +26,49 @@ public class DecisionTree<T> {
 
   public String getRootName() {
     return rootName;
+  }
+
+  public Predicate<T> getPredicate(String label) {
+    if (this.rootName == null || !this.nodes.containsKey(this.rootName)) {
+      return null;
+    }
+    return findPath(this.rootName, label);
+  }
+
+  private Predicate<T> findPath(String currentNodeName, String targetLabel) {
+    if (currentNodeName.equals(targetLabel)) {
+      return t -> true;
+    }
+
+    DecisionNode<T> node = this.nodes.get(currentNodeName);
+    if (node == null) {
+      return null;
+    }
+
+    Predicate<T> otherwiseCondition = t -> true;
+
+    for (Map.Entry<Predicate<T>, String> branch : node.getDescendants().entrySet()) {
+      Predicate<T> branchCondition = branch.getKey();
+      String nextNodeName = branch.getValue();
+
+      Predicate<T> pathFromChild = findPath(nextNodeName, targetLabel);
+
+      if (pathFromChild != null) {
+        return branchCondition.and(pathFromChild);
+      }
+
+      otherwiseCondition = otherwiseCondition.and(branchCondition.negate());
+    }
+
+    if (node.getLeftoverName() != null) {
+      Predicate<T> pathFromOtherwise = findPath(node.getLeftoverName(), targetLabel);
+
+      if (pathFromOtherwise != null) {
+        return otherwiseCondition.and(pathFromOtherwise);
+      }
+    }
+
+    return null;
   }
 
   public Map<String, List<T>> predict(Iterable<T> objects) {

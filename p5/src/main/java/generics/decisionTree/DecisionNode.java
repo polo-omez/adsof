@@ -21,6 +21,10 @@ public class DecisionNode<T> {
     return this;
   }
 
+  public Map<Predicate<T>, String> getDescendants() {
+    return descendants;
+  }
+
   public void otherwise(String targetName) {
     this.leftoverNode = targetName;
   }
@@ -44,9 +48,18 @@ public class DecisionNode<T> {
       return this.leftoverNode;
     }
 
-    System.out.println("[WARNING] " + object + " did not match any condition in node " + this.nodeName + "'.");
+    System.err.println("[WARNING] " + object + " did not match any condition in node " + this.nodeName + "'.");
 
     return this.nodeName;
+  }
+
+  public Predicate<T> getPredicate(String label) {
+    for (Map.Entry<Predicate<T>, String> entry : this.descendants.entrySet()) {
+      if (label.equals(entry.getValue())) {
+        return entry.getKey();
+      }
+    }
+    return null;
   }
 
 }
