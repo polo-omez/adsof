@@ -25,6 +25,10 @@ public class Dataset<T> {
     return data;
   }
 
+  public Featurizer<T> getFeaturizer() {
+    return featurizer;
+  }
+
   @SafeVarargs
   public final boolean addAll(T... elements) {
     return data.addAll(List.of(elements));
